@@ -1,9 +1,10 @@
 import GradientText from '@/components/text/gradientHeading'
+import PageContent from '@/components/text/pages/pageContent'
 import Image from 'next/image'
 
 export default function Home() {
 	return (
-		<article>
+		<PageContent className="">
 			<GradientText>Featured</GradientText>
 			<Image
 				className="rounded-md"
@@ -12,6 +13,6 @@ export default function Home() {
 				height={425}
 				alt="Placeholder"
 			></Image>
-		</article>
+		</PageContent>
 	)
 }
