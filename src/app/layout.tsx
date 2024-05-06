@@ -28,8 +28,8 @@ export default function RootLayout({
 			<body className={cn('min-h-screen font-poppins antialiased')}>
 				<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
 					<HeaderNavigation></HeaderNavigation>
-					<NavigationBar />
 					{children}
+					<NavigationBar />
 				</ThemeProvider>
 			</body>
 		</html>
