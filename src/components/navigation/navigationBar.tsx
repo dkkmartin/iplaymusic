@@ -14,7 +14,7 @@ export default function NavigationBar() {
 	return (
 		<nav
 			className={
-				'h-[65px] w-full flex items-center justify-evenly fixed bottom-0 shadow-[0px_0px_20px_5px_#00000024] ' +
+				'h-[65px] w-full flex items-center justify-evenly fixed bottom-0 shadow-[0px_0px_20px_5px_#00000024] max-w-md ' +
 				(theme === 'dark' ? 'bg-[#111625]' : 'bg-background')
 			}
 		>

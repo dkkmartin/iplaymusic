@@ -26,8 +26,8 @@ export default function RootLayout({
 	children: React.ReactNode
 }>) {
 	return (
-		<html lang="en">
-			<body className={cn('min-h-screen font-poppins antialiased')}>
+		<html lang="en" suppressHydrationWarning>
+			<body className={cn('min-h-screen font-poppins antialiased max-w-md m-auto')}>
 				<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
 					<HeaderNavigation></HeaderNavigation>
 					{children}
