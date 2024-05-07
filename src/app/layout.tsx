@@ -13,6 +13,8 @@ const poppins = Poppins({
 	variable: '--font-poppins',
 })
 
+export const revalidate = 3600
+
 export const metadata: Metadata = {
 	title: 'IPlayMusic',
 	description: 'Play music',
