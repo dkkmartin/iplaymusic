@@ -1,5 +1,5 @@
 import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/lib/authOptions'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
 	Dialog,
@@ -14,6 +14,7 @@ import { Separator } from '@/components/ui/separator'
 
 export default async function User() {
 	const session = await getServerSession(authOptions)
+	console.log(session)
 	if (session) {
 		return (
 			<Dialog>
