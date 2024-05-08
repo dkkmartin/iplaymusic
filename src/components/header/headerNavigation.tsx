@@ -10,12 +10,20 @@ export default function HeaderNavigation() {
 	const modiefiedPathname = pathname === '/' ? 'featured' : pathname.slice(1)
 
 	return (
-		<header className="flex sticky top-2 z-10 justify-between m-auto rounded-full items-center h-10 w-11/12 px-4 backdrop-blur-lg">
-			<Button variant={'ghost'} size={'icon'} onClick={() => router.back()}>
+		<header className="grid grid-cols-3 items-center sticky top-2 z-10 m-auto rounded-full h-10 w-11/12 px-4 backdrop-blur-lg">
+			<Button
+				className="justify-self-start"
+				variant={'ghost'}
+				size={'icon'}
+				onClick={() => router.back()}
+			>
 				<ChevronLeft className="size-10"></ChevronLeft>
 			</Button>
-			<h1 className="text-lg font-light">{modiefiedPathname.toUpperCase()}</h1>
-			<Button variant={'ghost'} size={'icon'}>
+
+			<h1 className="text-lg font-light justify-self-center col-start-2">
+				{modiefiedPathname.toUpperCase()}
+			</h1>
+			<Button className="justify-self-end col-start-3" variant={'ghost'} size={'icon'}>
 				<Search></Search>
 			</Button>
 		</header>
