@@ -3,8 +3,7 @@ import { Poppins } from 'next/font/google'
 import './globals.css'
 import { cn } from '@/lib/utils'
 import { ThemeProvider } from '@/components/theme-provider'
-import NavigationBar from '@/components/navigation/navigationBar'
-import HeaderNavigation from '@/components/header/headerNavigation'
+import SessionWrapper from '@/components/sessionWrapper'
 
 const poppins = Poppins({
 	style: 'normal',
@@ -26,14 +25,14 @@ export default function RootLayout({
 	children: React.ReactNode
 }>) {
 	return (
-		<html lang="en" suppressHydrationWarning>
-			<body className={cn('min-h-screen font-poppins antialiased max-w-md m-auto')}>
-				<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-					<HeaderNavigation></HeaderNavigation>
-					{children}
-					<NavigationBar />
-				</ThemeProvider>
-			</body>
-		</html>
+		<SessionWrapper>
+			<html lang="en" suppressHydrationWarning>
+				<body className={cn('min-h-screen font-poppins antialiased max-w-md m-auto')}>
+					<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+						{children}
+					</ThemeProvider>
+				</body>
+			</html>
+		</SessionWrapper>
 	)
 }
