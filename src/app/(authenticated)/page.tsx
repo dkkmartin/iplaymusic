@@ -41,7 +41,7 @@ export default async function Home() {
 		if (!session?.user.token) return
 		const res = await spotifyFetch(
 			'https://api.spotify.com/v1/browse/new-releases?limit=10',
-			session?.user.token
+			session.user.token
 		)
 		const data = await res.json()
 		return data
@@ -52,7 +52,7 @@ export default async function Home() {
 			<GradientText>Featured</GradientText>
 			<div className="flex flex-col items-center gap-8">
 				{data &&
-					data.albums.items.map((item, index) => (
+					data?.albums?.items.map((item, index) => (
 						<ImageCardWithOverlay
 							key={index}
 							imgSrc={item.images[0].url}

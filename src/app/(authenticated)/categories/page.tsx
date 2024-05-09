@@ -1,7 +1,9 @@
 import PageContent from '@/components/pages/pageContent'
 import GradientText from '@/components/text/gradientHeading'
 import CombinedAccordion from '@/components/ui/combinedAccordion'
-import { mock } from 'node:test'
+import { spotifyFetch } from '@/lib/utils'
+import { type Root } from '@/types/categories/categories'
+import { getServerSession } from 'next-auth'
 
 const colors = [
 	'#D70060',
@@ -152,7 +154,19 @@ const mockup = [
 	},
 ]
 
-export default function Categories() {
+export default async function Categories() {
+	const session = await getServerSession()
+
+	async function getCategories(): Promise<Root | undefined> {
+		if (!session?.user.token) return
+		const res = await spotifyFetch(
+			'https://api.spotify.com/v1/browse/categories?limit=50',
+			session.user.token
+		)
+
+		const data = await res.json()
+		return data
+	}
 	return (
 		<PageContent>
 			<GradientText>Categories</GradientText>
