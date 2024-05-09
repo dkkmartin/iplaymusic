@@ -2,7 +2,7 @@ import React, { SVGProps } from 'react'
 
 export function AudioSpinner(props: SVGProps<SVGSVGElement>) {
 	return (
-		<svg width={55} height={80} xmlns="http://www.w3.org/2000/svg" fill="#FFF" {...props}>
+		<svg width={55} height={80} xmlns="http://www.w3.org/2000/svg" fill="currentColor" {...props}>
 			<g transform="matrix(1 0 0 -1 0 80)">
 				<rect width={10} height={20} rx={3}>
 					<animate
