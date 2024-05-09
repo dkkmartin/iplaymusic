@@ -14,7 +14,6 @@ import { Separator } from '@/components/ui/separator'
 
 export default async function User() {
 	const session = await getServerSession(authOptions)
-	console.log(session)
 	if (session) {
 		return (
 			<Dialog>

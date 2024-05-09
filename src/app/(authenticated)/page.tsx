@@ -4,6 +4,7 @@ import ImageCardWithOverlay from '@/components/cards/ImageCardWithOverlay'
 import { spotifyFetch } from '@/lib/utils'
 import { authOptions } from '@/lib/authOptions'
 import { getServerSession } from 'next-auth'
+import { type Root } from '@/types/album/albumNewReleases'
 
 const mockup = [
 	{
@@ -34,32 +35,32 @@ const mockup = [
 
 export default async function Home() {
 	const session = await getServerSession(authOptions)
+	const data = await getAlbums()
 
-	async function getAlbums() {
+	async function getAlbums(): Promise<Root | undefined> {
+		if (!session?.user.token) return
 		const res = await spotifyFetch(
 			'https://api.spotify.com/v1/browse/new-releases?limit=10',
-			session?.access_token
+			session?.user.token
 		)
 		const data = await res.json()
-		console.log(data)
-		// return data.items
+		return data
 	}
-
-	getAlbums()
 
 	return (
 		<PageContent>
 			<GradientText>Featured</GradientText>
 			<div className="flex flex-col items-center gap-8">
-				{mockup.map((item, index) => (
-					<ImageCardWithOverlay
-						key={index}
-						imgSrc={item.src}
-						imageAlt={item.alt}
-						text={item.text}
-						subText={item.sub_text}
-					></ImageCardWithOverlay>
-				))}
+				{data &&
+					data.albums.items.map((item, index) => (
+						<ImageCardWithOverlay
+							key={index}
+							imgSrc={item.images[0].url}
+							imageAlt={item.name}
+							text={item.name}
+							subText={item.album_type}
+						></ImageCardWithOverlay>
+					))}
 			</div>
 		</PageContent>
 	)
