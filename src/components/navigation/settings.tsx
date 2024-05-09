@@ -20,7 +20,7 @@ export default function SettingsButton({ className }: { className?: string }) {
 				<ThemeSwitcher></ThemeSwitcher>
 				<User></User>
 				<Link href="/api/auth/signout">
-					<Button className="dark:bg-[#111625] dark:border-red-700 w-full" variant={'outline'}>
+					<Button className="dark:bg-[#111625] border-red-700 w-full" variant={'outline'}>
 						Logout
 					</Button>
 				</Link>
