@@ -6,33 +6,6 @@ import { authOptions } from '@/lib/authOptions'
 import { getServerSession } from 'next-auth'
 import { type Root } from '@/types/album/albumNewReleases'
 
-const mockup = [
-	{
-		src: '/stock.jpg',
-		alt: 'Placeholder',
-		text: 'The greatest showman',
-		sub_text: 'Soundtrack',
-	},
-	{
-		src: '/stock.jpg',
-		alt: 'Placeholder',
-		text: 'The greatest showman',
-		sub_text: 'Soundtrack',
-	},
-	{
-		src: '/stock.jpg',
-		alt: 'Placeholder',
-		text: 'The greatest showman',
-		sub_text: 'Soundtrack',
-	},
-	{
-		src: '/stock.jpg',
-		alt: 'Placeholder',
-		text: 'The greatest showman',
-		sub_text: 'Soundtrack',
-	},
-]
-
 export default async function Home() {
 	const session = await getServerSession(authOptions)
 	const data = await getAlbums()
