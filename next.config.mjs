@@ -1,14 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+	logging: {
+		fetches: {
+			fullUrl: true,
+		},
+	},
 	images: {
-		// REMOVE
-		unoptimized: true,
 		remotePatterns: [
 			{
 				protocol: 'https',
-				hostname: 'placehold.co',
+				hostname: 'i.scdn.co',
 				port: '',
-				pathname: '/**',
+				pathname: '/image/**',
 			},
 		],
 	},
