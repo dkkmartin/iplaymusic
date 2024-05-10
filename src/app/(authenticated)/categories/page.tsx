@@ -2,7 +2,6 @@ import PageContent from '@/components/pages/pageContent'
 import GradientText from '@/components/text/gradientHeading'
 import CategoriesAccordion from '@/components/ui/categoriesAccordion'
 import { authOptions } from '@/lib/authOptions'
-import { spotifyFetch } from '@/lib/utils'
 import { getServerSession } from 'next-auth'
 
 interface Genres {
@@ -30,17 +29,25 @@ export default async function Categories() {
 
 	async function getCategories(): Promise<Genres | undefined> {
 		if (!session?.user.token) return
-		const res = await spotifyFetch(
-			'https://api.spotify.com/v1/recommendations/available-genre-seeds',
-			session.user.token
-		)
+		const res = await fetch('https://api.spotify.com/v1/recommendations/available-genre-seeds', {
+			headers: {
+				Authorization: `Bearer ${session.user.token}`,
+			},
+		})
+		if (!res.ok) {
+			const text = await res.text()
+			console.error(`Error in getCategories: ${text}`)
+			return
+		}
 		const data = await res.json()
+
 		return data
 	}
 
 	return (
 		<PageContent>
 			<GradientText>Categories</GradientText>
+
 			<div className="flex flex-col gap-4">
 				{data &&
 					data.genres.map((category, index) => (

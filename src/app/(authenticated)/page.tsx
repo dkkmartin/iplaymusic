@@ -1,7 +1,6 @@
 import GradientText from '@/components/text/gradientHeading'
 import PageContent from '@/components/pages/pageContent'
 import ImageCardWithOverlay from '@/components/cards/ImageCardWithOverlay'
-import { spotifyFetch } from '@/lib/utils'
 import { authOptions } from '@/lib/authOptions'
 import { getServerSession } from 'next-auth'
 import { type Root } from '@/types/album/albumNewReleases'
@@ -12,10 +11,11 @@ export default async function Home() {
 
 	async function getAlbums(): Promise<Root | undefined> {
 		if (!session?.user.token) return
-		const res = await spotifyFetch(
-			'https://api.spotify.com/v1/browse/new-releases?limit=10',
-			session.user.token
-		)
+		const res = await fetch('https://api.spotify.com/v1/browse/new-releases?limit=10', {
+			headers: {
+				Authorization: `Bearer ${session.user.token}`,
+			},
+		})
 		const data = await res.json()
 		return data
 	}

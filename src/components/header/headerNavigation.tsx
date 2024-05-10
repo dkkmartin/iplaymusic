@@ -12,6 +12,7 @@ export default function HeaderNavigation() {
 	return (
 		<header className="grid grid-cols-3 items-center sticky top-2 z-10 m-auto rounded-full h-10 w-11/12 px-4 backdrop-blur-lg">
 			<Button
+				aria-label="Go back"
 				className="justify-self-start"
 				variant={'ghost'}
 				size={'icon'}
@@ -23,7 +24,12 @@ export default function HeaderNavigation() {
 			<h1 className="text-lg font-light justify-self-center col-start-2">
 				{modiefiedPathname.toUpperCase()}
 			</h1>
-			<Button className="justify-self-end col-start-3" variant={'ghost'} size={'icon'}>
+			<Button
+				aria-label="Search"
+				className="justify-self-end col-start-3"
+				variant={'ghost'}
+				size={'icon'}
+			>
 				<Search></Search>
 			</Button>
 		</header>
