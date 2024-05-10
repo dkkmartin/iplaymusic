@@ -1,3 +1,4 @@
+import { imageLoader } from '@/lib/utils'
 import Image from 'next/image'
 
 export default function ImageCardWithOverlay({

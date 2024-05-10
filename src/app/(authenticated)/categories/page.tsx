@@ -2,11 +2,8 @@ import PageContent from '@/components/pages/pageContent'
 import GradientText from '@/components/text/gradientHeading'
 import CategoriesAccordion from '@/components/ui/categoriesAccordion'
 import { authOptions } from '@/lib/authOptions'
+import { Root } from '@/types/categories/categories'
 import { getServerSession } from 'next-auth'
-
-interface Genres {
-	genres: string[]
-}
 
 const colors = [
 	'#f72585',
@@ -27,9 +24,9 @@ export default async function Categories() {
 	const session = await getServerSession(authOptions)
 	const data = await getCategories()
 
-	async function getCategories(): Promise<Genres | undefined> {
+	async function getCategories(): Promise<Root | undefined> {
 		if (!session?.user.token) return
-		const res = await fetch('https://api.spotify.com/v1/recommendations/available-genre-seeds', {
+		const res = await fetch('https://api.spotify.com/v1/browse/categories?limit=50', {
 			headers: {
 				Authorization: `Bearer ${session.user.token}`,
 			},
@@ -40,8 +37,12 @@ export default async function Categories() {
 			return
 		}
 		const data = await res.json()
-
 		return data
+	}
+
+	function colorFunction(index: number) {
+		let colorIndex = index % doubleColors.length
+		return doubleColors[colorIndex]
 	}
 
 	return (
@@ -50,15 +51,12 @@ export default async function Categories() {
 
 			<div className="flex flex-col gap-4">
 				{data &&
-					data.genres.map((category, index) => (
+					data.categories.items.map((category, index) => (
 						<CategoriesAccordion
-							color={() => {
-								let colorIndex = index % doubleColors.length
-								return doubleColors[colorIndex]
-							}}
-							title={category}
+							color={colorFunction(index)}
+							title={category.name}
 							key={index}
-							slug={category}
+							slug={category.name}
 						></CategoriesAccordion>
 					))}
 			</div>
