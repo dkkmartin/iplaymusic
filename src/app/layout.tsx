@@ -17,7 +17,7 @@ export const fetchCache = 'force-cache'
 
 export const metadata: Metadata = {
 	title: 'IPlayMusic',
-	description: 'Play music',
+	description: 'Play music now',
 }
 
 export default function RootLayout({
