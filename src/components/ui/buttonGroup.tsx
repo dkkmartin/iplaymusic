@@ -3,9 +3,10 @@ import { Button } from './button'
 
 interface ButtonGroupProps {
 	buttonLabels: string[]
+	callback?: (label: string) => void
 }
 
-export default function ButtonGroup({ buttonLabels }: ButtonGroupProps) {
+export default function ButtonGroup({ buttonLabels, callback }: ButtonGroupProps) {
 	return (
 		<div className="flex rounded">
 			{buttonLabels.map((label, index) => {
@@ -42,7 +43,12 @@ export default function ButtonGroup({ buttonLabels }: ButtonGroupProps) {
 				}
 
 				return (
-					<Button aria-label={label} className={className} key={index}>
+					<Button
+						onClick={() => callback && callback(label)}
+						aria-label={label}
+						className={className}
+						key={index}
+					>
 						{label}
 					</Button>
 				)
