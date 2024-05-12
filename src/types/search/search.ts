@@ -1,4 +1,5 @@
 export interface Root {
+	[key: string]: any
 	albums: Albums
 	artists: Artists
 	tracks: Tracks
