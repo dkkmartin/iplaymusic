@@ -3,6 +3,7 @@
 import { ChevronLeft, Search } from 'lucide-react'
 import { useRouter, usePathname } from 'next/navigation'
 import { Button } from '../ui/button'
+import Link from 'next/link'
 
 export default function HeaderNavigation() {
 	const router = useRouter()
@@ -24,14 +25,11 @@ export default function HeaderNavigation() {
 			<h1 className="text-lg font-light justify-self-center col-start-2">
 				{modiefiedPathname.toUpperCase()}
 			</h1>
-			<Button
-				aria-label="Search"
-				className="justify-self-end col-start-3"
-				variant={'ghost'}
-				size={'icon'}
-			>
-				<Search></Search>
-			</Button>
+			<Link href="/search" className="justify-self-end col-start-3">
+				<Button aria-label="Search" variant={'ghost'} size={'icon'}>
+					<Search></Search>
+				</Button>
+			</Link>
 		</header>
 	)
 }
