@@ -8,7 +8,6 @@ import { Root } from '@/types/search/search'
 import Image from 'next/image'
 import GradientText from '@/components/text/gradientHeading'
 import ButtonGroup from '@/components/ui/buttonGroup'
-import { useAutoAnimate } from '@formkit/auto-animate/react'
 import { useDebounce } from '@uidotdev/usehooks'
 
 export default function Search() {
@@ -82,7 +81,7 @@ export default function Search() {
 			</div>
 			<section>
 				{data && (
-					<div className="my-8 overflow-hidden grid grid-cols-2 items-center justify-items-center border rounded-xl dark:border-white dark:bg-[#111625]">
+					<div className="shadow-2xl my-8 overflow-hidden grid grid-cols-2 items-center justify-items-center border rounded-xl dark:border-white dark:bg-[#111625]">
 						<h1 className="text-3xl font-bold text-center">{data?.artists?.items[0].name}</h1>
 						<Image
 							className="w-full"
