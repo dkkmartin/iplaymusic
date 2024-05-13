@@ -4,7 +4,7 @@ import PageContent from '@/components/pages/pageContent'
 import { Input } from '@/components/ui/input'
 import { useSession } from 'next-auth/react'
 import { useState, useEffect, useCallback } from 'react'
-import { Albums, Root } from '@/types/search/search'
+import { Root } from '@/types/search/search'
 import Image from 'next/image'
 import GradientText from '@/components/text/gradientHeading'
 import ButtonGroup from '@/components/ui/buttonGroup'
@@ -14,9 +14,8 @@ import { useDebounce } from '@uidotdev/usehooks'
 export default function Search() {
 	const [query, setQuery] = useState('')
 	const [data, setData] = useState<Root | undefined>()
-	const [filteredData, setFilteredData] = useState<Albums | undefined>()
+	const [filteredData, setFilteredData] = useState<Root | undefined>()
 	const [dataHasFiltered, setDataHasFiltered] = useState(false)
-	const [parent, enableAnimations] = useAutoAnimate()
 	const debouncedQuery = useDebounce(query, 200)
 	const { data: session, status } = useSession()
 
@@ -25,13 +24,13 @@ export default function Search() {
 		setDataHasFiltered(true)
 		filter = filter.toLowerCase()
 		const filteredData = data[filter]
-		console.log(filteredData)
-		setFilteredData(filteredData as Root[typeof filter])
+		filteredData.label = filter
+		setFilteredData(filteredData)
 	}
 
 	const searchQuery = useCallback(async () => {
 		if (!debouncedQuery || !session?.user.token) return
-
+		setDataHasFiltered(false)
 		const encodedSearchQuery = encodeURIComponent(debouncedQuery)
 		const res = await fetch(`/api/search/${encodedSearchQuery}`, {
 			method: 'POST',
@@ -83,7 +82,7 @@ export default function Search() {
 			</div>
 			<section>
 				{data && (
-					<div className="my-8 overflow-hidden grid grid-cols-2 items-center justify-items-center border rounded-md dark:border-white dark:bg-[#111625]">
+					<div className="my-8 overflow-hidden grid grid-cols-2 items-center justify-items-center border rounded-xl dark:border-white dark:bg-[#111625]">
 						<h1 className="text-3xl font-bold text-center">{data?.artists?.items[0].name}</h1>
 						<Image
 							className="w-full"
@@ -100,7 +99,7 @@ export default function Search() {
 								return (
 									<div key={key} className="py-4">
 										<GradientText>{key}</GradientText>
-										<div className="grid grid-cols-2 gap-4" ref={parent}>
+										<div className="grid grid-cols-2 gap-4">
 											{data[key].items.map((item: any, index: number) => (
 												<div key={index} className="overflow-hidden">
 													<Image
@@ -127,28 +126,33 @@ export default function Search() {
 								)
 							}
 					  })
-					: filteredData &&
-					  filteredData?.items?.map((item, index) => (
-							<div key={index} className="overflow-hidden">
-								<Image
-									className="rounded-xl object-cover max-h-[182px] min-h-[182px]"
-									src={
-										item.album
-											? item.album.images[0]?.url
-											: item.images && item.images.length > 0
-											? item.images[0].url
-											: ''
-									}
-									width={182}
-									height={182}
-									alt={`${item.name} ${item.type} cover`}
-								/>
-
-								<h2 className="scroll-m-20 py-4 text-3xl font-semibold tracking-tight first:mt-0">
-									{item.name.length > 25 ? item.name.slice(0, 25) + '...' : item.name}
-								</h2>
-							</div>
-					  ))}
+					: filteredData && (
+							<>
+								<GradientText>{filteredData.label?.toUpperCase() ?? ''}</GradientText>
+								<section className="grid grid-cols-2 gap-4">
+									{filteredData.items.map((item: any, index: number) => (
+										<div key={index} className="overflow-hidden">
+											<Image
+												className="rounded-xl object-cover max-h-[182px] min-h-[182px]"
+												src={
+													item.album
+														? item.album.images[0]?.url
+														: item.images && item.images.length > 0
+														? item.images[0].url
+														: ''
+												}
+												width={182}
+												height={182}
+												alt={`${item.name} ${item.type} cover`}
+											/>
+											<h2 className="scroll-m-20 py-4 text-3xl font-semibold tracking-tight first:mt-0">
+												{item.name.length > 25 ? item.name.slice(0, 25) + '...' : item.name}
+											</h2>
+										</div>
+									))}
+								</section>
+							</>
+					  )}
 			</section>
 		</PageContent>
 	)
