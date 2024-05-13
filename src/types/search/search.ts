@@ -7,6 +7,7 @@ export interface Root {
 	shows: Shows
 	episodes: Episodes
 	audiobooks: Audiobooks
+	label?: string
 }
 
 export interface Albums {
