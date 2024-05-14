@@ -3,7 +3,7 @@
 import Marquee from 'react-fast-marquee'
 import Image from 'next/image'
 import { useState, useEffect, useCallback } from 'react'
-import { Play, Pause, ChevronsLeft, ChevronsRight, Headphones } from 'lucide-react'
+import { Play, Pause, ChevronsLeft, ChevronsRight, Headphones, Smartphone, Tv2 } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { SpotfiyPlayback } from '../svg/spotifyPlayback'
 import {
@@ -14,16 +14,18 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Root } from '@/types/player/devices'
+import { Device, Root } from '@/types/player/devices'
 
 export const WebPlayback = ({ token }: { token: string }) => {
 	const [is_paused, setPaused] = useState<boolean>(false)
-	const [is_active, setActive] = useState<boolean>(false)
 	const [player, setPlayer] = useState<Spotify.Player | null>(null)
-	const [playerId, setPlayerId] = useState<string>('')
 	const [playerDevices, setPlayerDevices] = useState<Root | undefined>(undefined)
 	const [current_track, setTrack] = useState<Spotify.Track | null>(null)
 	const { data: session, status } = useSession()
+
+	const sleep = (milliseconds: number) => {
+		return new Promise((resolve) => setTimeout(resolve, milliseconds))
+	}
 
 	async function handleDeviceChange(deviceId: string) {
 		try {
@@ -39,6 +41,8 @@ export const WebPlayback = ({ token }: { token: string }) => {
 			})
 
 			const data = await response.json()
+
+			getDevices()
 			return data
 		} catch (error) {
 			console.error('Error:', error)
@@ -54,7 +58,6 @@ export const WebPlayback = ({ token }: { token: string }) => {
 				},
 			})
 			const data = await response.json()
-			console.log(data)
 			setPlayerDevices(data)
 		} catch (error) {
 			console.error('Error:', error)
@@ -89,7 +92,6 @@ export const WebPlayback = ({ token }: { token: string }) => {
 
 			player.addListener('ready', ({ device_id }) => {
 				console.log('Ready with Device ID', device_id)
-				setPlayerId(device_id)
 			})
 
 			player.addListener('not_ready', ({ device_id }) => {
@@ -105,14 +107,6 @@ export const WebPlayback = ({ token }: { token: string }) => {
 
 				setTrack(state.track_window.current_track)
 				setPaused(state.paused)
-
-				player.getCurrentState().then((state) => {
-					if (!state) {
-						setActive(false)
-					} else {
-						setActive(true)
-					}
-				})
 			})
 
 			player.connect()
@@ -121,7 +115,7 @@ export const WebPlayback = ({ token }: { token: string }) => {
 				player.disconnect()
 			}
 		}
-	}, [token, session?.user.token, getDevices])
+	}, [token, session?.user.token])
 
 	if (!player) {
 		return (
@@ -133,26 +127,16 @@ export const WebPlayback = ({ token }: { token: string }) => {
 				</div>
 			</>
 		)
-	} else if (!is_active) {
-		return (
-			<>
-				<div className="container">
-					<div className="main-wrapper">
-						<b>Instance not active. Transfer your playback using your Spotify app</b>
-					</div>
-				</div>
-			</>
-		)
 	} else {
 		return (
 			<>
 				<section className="dark:bg-[#111625] p-2 flex gap-2 border-b border-t">
 					{current_track && current_track.album.images[0].url ? (
 						<Image
-							width={40}
-							height={40}
+							width={50}
+							height={50}
 							src={current_track.album.images[0].url}
-							className="now-playing__cover"
+							className="rounded"
 							alt=""
 						/>
 					) : null}
@@ -179,21 +163,30 @@ export const WebPlayback = ({ token }: { token: string }) => {
 							<DropdownMenuTrigger>
 								<SpotfiyPlayback className="size-5 text-green-600"></SpotfiyPlayback>
 							</DropdownMenuTrigger>
-							<DropdownMenuContent className="dark:bg-[#111625]">
-								<DropdownMenuLabel>Devices</DropdownMenuLabel>
+							<DropdownMenuContent onFocus={getDevices} className="dark:bg-[#111625]">
+								<DropdownMenuLabel className="text-center">Devices</DropdownMenuLabel>
 								<DropdownMenuSeparator />
 								{playerDevices &&
-									playerDevices?.devices?.map((device: any) => (
+									playerDevices?.devices?.map((device: Device) => (
 										<DropdownMenuItem
-											onClick={() =>
-												handleDeviceChange(device.id).then(() => {
-													setTimeout(() => {
-														getDevices()
-													}, 1000)
+											className={`flex gap-1 ${device.is_active ? 'text-green-600' : ''}`}
+											onClick={() => {
+												handleDeviceChange(device.id)
+												sleep(1000).then(() => {
+													getDevices()
 												})
-											}
+											}}
 											key={device.id}
 										>
+											{device.type === 'Smartphone' ? (
+												<Smartphone
+													className={`size-4 ${device.is_active ? 'text-green-600' : ''}`}
+												></Smartphone>
+											) : device.type === 'Computer' ? (
+												<Tv2 className={`size-4 ${device.is_active ? 'text-green-600' : ''}`}></Tv2>
+											) : (
+												<Headphones className="size-3 text-green-600"></Headphones>
+											)}
 											{device.name}
 										</DropdownMenuItem>
 									))}
