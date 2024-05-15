@@ -2,73 +2,65 @@
 
 import Marquee from 'react-fast-marquee'
 import Image from 'next/image'
-import { useState, useEffect, useCallback } from 'react'
-import { Play, Pause, ChevronsLeft, ChevronsRight, Headphones, Smartphone, Tv2 } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Play, Pause, ChevronsLeft, ChevronsRight, Headphones } from 'lucide-react'
 import { useSession } from 'next-auth/react'
-import { SpotfiyPlayback } from '../svg/spotifyPlayback'
+import PlaybackChanger from './playbackChanger'
+import { usePlaybackStore } from '@/lib/stores'
 import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Device, Root } from '@/types/player/devices'
+	getRecentlyPlayed,
+	handleDeviceChange,
+	pausePlayback,
+	resumePlayback,
+	sleep,
+} from '@/lib/spotify/utils'
+import { Root } from '@/types/spotify/recentlyPlayed'
+import { Button } from '../ui/button'
 
 export const WebPlayback = ({ token }: { token: string }) => {
-	const [is_paused, setPaused] = useState<boolean>(false)
+	const [isPaused, setPaused] = useState<boolean>(true)
 	const [player, setPlayer] = useState<Spotify.Player | null>(null)
-	const [playerDevices, setPlayerDevices] = useState<Root | undefined>(undefined)
-	const [current_track, setTrack] = useState<Spotify.Track | null>(null)
+	const [recentlyPlayed, setRecentlyPlayed] = useState<Root | null>(null)
+	const [deviceId, setDeviceId] = useState<string | null>(null)
 	const { data: session, status } = useSession()
+	const playbackState = usePlaybackStore((state) => state.playbackState)
 
-	const sleep = (milliseconds: number) => {
-		return new Promise((resolve) => setTimeout(resolve, milliseconds))
-	}
+	async function handleResumePlayback() {
+		if (!isPaused) return
+		if (!deviceId) return
+		if (!session?.user.token) return
 
-	async function handleDeviceChange(deviceId: string) {
-		try {
-			const response = await fetch('https://api.spotify.com/v1/me/player', {
-				method: 'PUT',
-				headers: {
-					Authorization: 'Bearer ' + session?.user.token,
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					device_ids: [deviceId],
-				}),
-			})
-
-			const data = await response.json()
-
-			getDevices()
-			return data
-		} catch (error) {
-			console.error('Error:', error)
+		// If current device is the same as the device we want to resume playback on, resume playback
+		if (playbackState?.device.id === deviceId) {
+			setPaused(false)
+			resumePlayback(session?.user.token)
+		} else {
+			// If current device is not the same as the device we want to resume playback on, change device
+			await handleDeviceChange(deviceId, session?.user.token)
+			setPaused(false)
+			resumePlayback(session?.user.token)
 		}
 	}
 
-	const getDevices = useCallback(async () => {
-		try {
-			const response = await fetch('https://api.spotify.com/v1/me/player/devices', {
-				method: 'GET',
-				headers: {
-					Authorization: 'Bearer ' + session?.user.token,
-				},
-			})
-			const data = await response.json()
-			setPlayerDevices(data)
-		} catch (error) {
-			console.error('Error:', error)
-		}
-	}, [session?.user.token])
+	async function handlePausePlayback() {
+		if (isPaused) return
+		if (!deviceId) return
+		if (!session?.user.token) return
+
+		setPaused(true)
+		await pausePlayback(session?.user.token)
+	}
 
 	useEffect(() => {
-		if (session?.user?.token) {
-			getDevices()
+		async function updateRecentlyPlayed() {
+			if (status !== 'authenticated') return
+			if (!playbackState) {
+				const recentlyPlayed = await getRecentlyPlayed(session?.user?.token ?? '')
+				setRecentlyPlayed(recentlyPlayed)
+			}
 		}
-	}, [session?.user?.token, getDevices])
+		updateRecentlyPlayed()
+	}, [session?.user?.token, status, playbackState])
 
 	useEffect(() => {
 		if (document.querySelector('script[src="https://sdk.scdn.co/spotify-player.js"]')) return
@@ -81,7 +73,7 @@ export const WebPlayback = ({ token }: { token: string }) => {
 
 		window.onSpotifyWebPlaybackSDKReady = () => {
 			const player = new window.Spotify.Player({
-				name: 'Web Playback SDK',
+				name: 'iPlayMusic web player',
 				getOAuthToken: (cb) => {
 					cb(token)
 				},
@@ -91,6 +83,7 @@ export const WebPlayback = ({ token }: { token: string }) => {
 			setPlayer(player)
 
 			player.addListener('ready', ({ device_id }) => {
+				setDeviceId(device_id)
 				console.log('Ready with Device ID', device_id)
 			})
 
@@ -99,15 +92,6 @@ export const WebPlayback = ({ token }: { token: string }) => {
 			})
 
 			player.setName('iPlayMusic web player')
-
-			player.addListener('player_state_changed', (state) => {
-				if (!state) {
-					return
-				}
-
-				setTrack(state.track_window.current_track)
-				setPaused(state.paused)
-			})
 
 			player.connect()
 
@@ -118,80 +102,61 @@ export const WebPlayback = ({ token }: { token: string }) => {
 	}, [token, session?.user.token])
 
 	if (!player) {
+		return null
+	} else if (playbackState || recentlyPlayed) {
 		return (
 			<>
-				<div className="container">
-					<div className="main-wrapper">
-						<b>Spotify Player is null</b>
-					</div>
-				</div>
-			</>
-		)
-	} else {
-		return (
-			<>
-				<section className="dark:bg-[#111625] p-2 flex gap-2 border-b border-t">
-					{current_track && current_track.album.images[0].url ? (
+				<section className="dark:bg-[#111625] bg-background p-2 flex gap-2 border-b border-t">
+					{playbackState && playbackState?.is_playing ? (
 						<Image
 							width={50}
 							height={50}
-							src={current_track.album.images[0].url}
+							src={playbackState.item.album.images[2].url}
 							className="rounded"
-							alt=""
+							alt={`${playbackState.item.name} ${playbackState.item.type} cover`}
 						/>
-					) : null}
+					) : (
+						recentlyPlayed && (
+							<Image
+								width={50}
+								height={50}
+								src={recentlyPlayed?.items[0].track.album.images[2].url ?? ''}
+								className="rounded"
+								alt={`${recentlyPlayed?.items[0].track.name} ${recentlyPlayed?.items[0].track.type} cover`}
+							/>
+						)
+					)}
 					<div className="flex flex-col overflow-hidden justify-center">
-						<Marquee speed={30} className="shadow-inner">
-							<div className="flex gap-2">
-								<p className="font-bold">{current_track?.name}</p>
-								<span>&#9679;</span>
-								<p className="font-bold">{current_track?.artists[0].name}</p>
-							</div>
-							<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-						</Marquee>
-						{playerDevices?.devices?.find((device) => device.is_active) ? (
+						{playbackState && playbackState?.is_playing ? (
+							<Marquee speed={30} className="shadow-inner">
+								<div className="flex gap-2">
+									<p className="font-bold">{playbackState.item.name}</p>
+									<span>&#9679;</span>
+									<p className="font-bold">{playbackState.item.artists[0].name}</p>
+								</div>
+								<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+							</Marquee>
+						) : (
+							<Marquee speed={30} className="shadow-inner">
+								<div className="flex gap-2">
+									<p className="font-bold">{recentlyPlayed?.items[0].track.name}</p>
+									<span>&#9679;</span>
+									<p className="font-bold">{recentlyPlayed?.items[0].track.artists[0].name}</p>
+								</div>
+								<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+							</Marquee>
+						)}
+						{playbackState && playbackState?.is_playing ? (
 							<div className="flex gap-1 items-center">
 								<Headphones className="size-3 text-green-600"></Headphones>
-								<p className="text-sm text-green-600">
-									{playerDevices?.devices?.find((device) => device.is_active)?.name}
-								</p>
+								<p className="text-sm text-green-600">{playbackState.device.name}</p>
 							</div>
 						) : null}
 					</div>
 					<div className="now-playing__side flex gap-2 items-center">
-						<DropdownMenu>
-							<DropdownMenuTrigger>
-								<SpotfiyPlayback className="size-5 text-green-600"></SpotfiyPlayback>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent onFocus={getDevices} className="dark:bg-[#111625]">
-								<DropdownMenuLabel className="text-center">Devices</DropdownMenuLabel>
-								<DropdownMenuSeparator />
-								{playerDevices &&
-									playerDevices?.devices?.map((device: Device) => (
-										<DropdownMenuItem
-											className={`flex gap-1 ${device.is_active ? 'text-green-600' : ''}`}
-											onClick={() => {
-												handleDeviceChange(device.id)
-												sleep(1000).then(() => {
-													getDevices()
-												})
-											}}
-											key={device.id}
-										>
-											{device.type === 'Smartphone' ? (
-												<Smartphone
-													className={`size-4 ${device.is_active ? 'text-green-600' : ''}`}
-												></Smartphone>
-											) : device.type === 'Computer' ? (
-												<Tv2 className={`size-4 ${device.is_active ? 'text-green-600' : ''}`}></Tv2>
-											) : (
-												<Headphones className="size-3 text-green-600"></Headphones>
-											)}
-											{device.name}
-										</DropdownMenuItem>
-									))}
-							</DropdownMenuContent>
-						</DropdownMenu>
+						<PlaybackChanger
+							className={playbackState?.device.id === deviceId ? 'text-green-600' : ''}
+						></PlaybackChanger>
 
 						<button
 							className="btn-spotify"
@@ -201,14 +166,29 @@ export const WebPlayback = ({ token }: { token: string }) => {
 						>
 							<ChevronsLeft></ChevronsLeft>
 						</button>
-						<button
-							className="btn-spotify"
-							onClick={() => {
-								player.togglePlay()
-							}}
-						>
-							{is_paused ? <Play></Play> : <Pause></Pause>}
-						</button>
+						{isPaused ? (
+							<Button
+								size={'icon'}
+								variant={'ghost'}
+								className="btn-spotify"
+								onClick={() => {
+									handleResumePlayback()
+								}}
+							>
+								<Play></Play>
+							</Button>
+						) : (
+							<Button
+								size={'icon'}
+								variant={'ghost'}
+								className="btn-spotify"
+								onClick={() => {
+									handlePausePlayback()
+								}}
+							>
+								<Pause></Pause>
+							</Button>
+						)}
 
 						<button
 							className="btn-spotify"
