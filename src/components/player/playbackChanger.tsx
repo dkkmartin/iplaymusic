@@ -11,7 +11,7 @@ import {
 import { SpotfiyPlayback } from '../svg/spotifyPlayback'
 import { Smartphone, Tv2, Headphones } from 'lucide-react'
 import { Device } from '@/types/spotify/devices'
-import { getDevices, getPlaybackState, handleDeviceChange, sleep } from '@/lib/spotify/utils'
+import { getDevices, getPlaybackState, handleDeviceChange } from '@/lib/spotify/utils'
 import { useSession } from 'next-auth/react'
 import { useDeviceStore } from '@/lib/stores'
 import { cn } from '@/lib/utils'
