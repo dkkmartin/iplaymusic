@@ -2,17 +2,16 @@
 
 import Marquee from 'react-fast-marquee'
 import Image from 'next/image'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Play, Pause, ChevronsLeft, ChevronsRight, Headphones } from 'lucide-react'
-import { useSession } from 'next-auth/react'
 import PlaybackChanger from './playbackChanger'
 import { usePlaybackStore } from '@/lib/stores'
 import {
+	getPlaybackState,
 	getRecentlyPlayed,
 	handleDeviceChange,
 	pausePlayback,
 	resumePlayback,
-	sleep,
 } from '@/lib/spotify/utils'
 import { Root } from '@/types/spotify/recentlyPlayed'
 import { Button } from '../ui/button'
@@ -22,46 +21,104 @@ export const WebPlayback = ({ token }: { token: string }) => {
 	const [player, setPlayer] = useState<Spotify.Player | null>(null)
 	const [recentlyPlayed, setRecentlyPlayed] = useState<Root | null>(null)
 	const [deviceId, setDeviceId] = useState<string | null>(null)
-	const { data: session, status } = useSession()
 	const playbackState = usePlaybackStore((state) => state.playbackState)
+	const intervalIdRef = useRef<NodeJS.Timeout | null>(null)
 
 	async function handleResumePlayback() {
-		if (!isPaused) return
 		if (!deviceId) return
-		if (!session?.user.token) return
 
-		// If current device is the same as the device we want to resume playback on, resume playback
+		// If current device is the same as the device, resume playback on this device
 		if (playbackState?.device.id === deviceId) {
+			resumePlayback(token)
 			setPaused(false)
-			resumePlayback(session?.user.token)
+		} else if (playbackState?.is_playing) {
+			// If a device is playing, resume playback on that device
+			resumePlayback(token)
+			setPaused(false)
 		} else {
-			// If current device is not the same as the device we want to resume playback on, change device
-			await handleDeviceChange(deviceId, session?.user.token)
+			// If no device is playing, change device to this and resume playback
+			await handleDeviceChange(deviceId, token)
+			resumePlayback(token)
 			setPaused(false)
-			resumePlayback(session?.user.token)
 		}
 	}
 
-	async function handlePausePlayback() {
-		if (isPaused) return
-		if (!deviceId) return
-		if (!session?.user.token) return
-
+	function handlePausePlayback() {
+		pausePlayback(token)
 		setPaused(true)
-		await pausePlayback(session?.user.token)
 	}
 
 	useEffect(() => {
+		if (isPaused) console.log('paused')
+		if (!isPaused) console.log('playing')
+	}, [isPaused])
+
+	// useEffect for watching the is_playing value
+	// This will get the playback state of any device playing for the first render
+	// If is_playing is true,
+	// the playbutton will be set to the paused icon as in to pause the player
+	useEffect(() => {
+		if (playbackState?.is_playing) setPaused(false)
+		if (!playbackState?.is_playing) setPaused(true)
+	}, [playbackState?.is_playing])
+
+	// useEffects for polling the playback state once and then every 5 seconds
+	useEffect(() => {
+		getPlaybackState(token)
+	}, [token])
+
+	// useEffect for handling polling time
+	// If response is 204 the polling will switch to a polling time of 4000ms
+	// If response is 200 the polling will switch to a polling time of 2000ms
+	// If response is 429 the polling will stop as it has exceeded its rate limits
+	// This is to decrease the number of requests to the server if there is not playback
+	useEffect(() => {
+		const pollPlaybackState = async () => {
+			try {
+				const res = await getPlaybackState(token)
+				if (res === 204) {
+					if (intervalIdRef.current) {
+						clearInterval(intervalIdRef.current)
+					}
+					intervalIdRef.current = setInterval(pollPlaybackState, 4000)
+					console.warn('Polling slowed: playback state is not available or active')
+				} else if (res === 429) {
+					console.warn('Polling stopped: Polling rate limit exceeded')
+					if (intervalIdRef.current) {
+						clearInterval(intervalIdRef.current)
+					}
+				} else if (res === 200) {
+					if (intervalIdRef.current) {
+						clearInterval(intervalIdRef.current)
+					}
+					intervalIdRef.current = setInterval(pollPlaybackState, 2000)
+				}
+			} catch (error) {
+				console.error('Error getting playback state:', error)
+			}
+		}
+
+		intervalIdRef.current = setInterval(pollPlaybackState, 2000)
+
+		return () => {
+			if (intervalIdRef.current) {
+				clearInterval(intervalIdRef.current)
+			}
+		}
+	}, [token, isPaused])
+
+	// useEffect for getting recently played information in the player
+	useEffect(() => {
 		async function updateRecentlyPlayed() {
-			if (status !== 'authenticated') return
 			if (!playbackState) {
-				const recentlyPlayed = await getRecentlyPlayed(session?.user?.token ?? '')
+				const recentlyPlayed = await getRecentlyPlayed(token)
 				setRecentlyPlayed(recentlyPlayed)
 			}
 		}
 		updateRecentlyPlayed()
-	}, [session?.user?.token, status, playbackState])
+	}, [token, playbackState])
 
+	// useEffect for handling music streaming and device creation
 	useEffect(() => {
 		if (document.querySelector('script[src="https://sdk.scdn.co/spotify-player.js"]')) return
 
@@ -99,7 +156,7 @@ export const WebPlayback = ({ token }: { token: string }) => {
 				player.disconnect()
 			}
 		}
-	}, [token, session?.user.token])
+	}, [token])
 
 	if (!player) {
 		return null
@@ -107,27 +164,26 @@ export const WebPlayback = ({ token }: { token: string }) => {
 		return (
 			<>
 				<section className="dark:bg-[#111625] bg-background p-2 flex gap-2 border-b border-t">
-					{playbackState && playbackState?.is_playing ? (
+					{playbackState ? (
 						<Image
 							width={50}
 							height={50}
-							src={playbackState.item.album.images[2].url}
+							src={playbackState?.item?.album?.images[2].url}
 							className="rounded"
 							alt={`${playbackState.item.name} ${playbackState.item.type} cover`}
 						/>
-					) : (
-						recentlyPlayed && (
-							<Image
-								width={50}
-								height={50}
-								src={recentlyPlayed?.items[0].track.album.images[2].url ?? ''}
-								className="rounded"
-								alt={`${recentlyPlayed?.items[0].track.name} ${recentlyPlayed?.items[0].track.type} cover`}
-							/>
-						)
-					)}
+					) : recentlyPlayed ? (
+						<Image
+							width={50}
+							height={50}
+							src={recentlyPlayed?.items[0].track.album.images[2].url ?? ''}
+							className="rounded"
+							alt={`${recentlyPlayed?.items[0].track.name} ${recentlyPlayed?.items[0].track.type} cover`}
+						/>
+					) : null}
+
 					<div className="flex flex-col overflow-hidden justify-center">
-						{playbackState && playbackState?.is_playing ? (
+						{playbackState ? (
 							<Marquee speed={30} className="shadow-inner">
 								<div className="flex gap-2">
 									<p className="font-bold">{playbackState.item.name}</p>
@@ -146,7 +202,7 @@ export const WebPlayback = ({ token }: { token: string }) => {
 								<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
 							</Marquee>
 						)}
-						{playbackState && playbackState?.is_playing ? (
+						{playbackState ? (
 							<div className="flex gap-1 items-center">
 								<Headphones className="size-3 text-green-600"></Headphones>
 								<p className="text-sm text-green-600">{playbackState.device.name}</p>
