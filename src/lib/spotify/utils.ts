@@ -1,5 +1,6 @@
 import { usePlaybackStore, useDeviceStore } from '@/lib/stores'
 import { Root } from '@/types/spotify/recentlyPlayed'
+import { randomFill } from 'crypto'
 
 export const sleep = (milliseconds: number) => {
 	return new Promise((resolve) => setTimeout(resolve, milliseconds))
@@ -9,7 +10,7 @@ const setPlaybackState = usePlaybackStore.getState().setPlaybackState
 const setDevicesState = useDeviceStore.getState().setDevicesState
 
 export async function getPlaybackState(token: string) {
-	await sleep(1000)
+	// await sleep(1000)
 	try {
 		const response = await fetch('https://api.spotify.com/v1/me/player', {
 			method: 'GET',
@@ -17,10 +18,17 @@ export async function getPlaybackState(token: string) {
 				Authorization: `Bearer ${token}`,
 			},
 		})
-		const data = await response.json()
-		console.log('data', data)
-		// Set playback state in store
-		setPlaybackState(data)
+
+		if (response.status === 204) {
+			return response.status
+		} else if (response.status === 429) {
+			return response.status
+		} else {
+			const data = await response.json()
+			// Set playback state in store
+			setPlaybackState(data)
+			return response.status
+		}
 	} catch (error) {
 		console.log('Error: ' + error)
 	}
@@ -84,7 +92,7 @@ export async function resumePlayback(token: string) {
 		const startTime = usePlaybackStore.getState().playbackState?.progress_ms
 		const trackUri = recentlyPlayed.items[0].track.uri
 
-		const response = await fetch('https://api.spotify.com/v1/me/player/play', {
+		await fetch('https://api.spotify.com/v1/me/player/play', {
 			method: 'PUT',
 			headers: {
 				Authorization: `Bearer ${token}`,
@@ -95,10 +103,8 @@ export async function resumePlayback(token: string) {
 				position_ms: startTime,
 			}),
 		})
-		return true
 	} catch (error) {
 		console.error('Error:', error)
-		return false
 	}
 }
 export async function pausePlayback(token: string) {
@@ -110,11 +116,8 @@ export async function pausePlayback(token: string) {
 				'Content-Type': 'application/json',
 			},
 		})
-		await getPlaybackState(token)
-		return true
 	} catch (error) {
 		console.error('Error:', error)
-		return false
 	}
 }
 
