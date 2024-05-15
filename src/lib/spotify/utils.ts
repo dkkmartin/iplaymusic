@@ -1,16 +1,10 @@
 import { usePlaybackStore, useDeviceStore } from '@/lib/stores'
 import { Root } from '@/types/spotify/recentlyPlayed'
-import { randomFill } from 'crypto'
-
-export const sleep = (milliseconds: number) => {
-	return new Promise((resolve) => setTimeout(resolve, milliseconds))
-}
 
 const setPlaybackState = usePlaybackStore.getState().setPlaybackState
 const setDevicesState = useDeviceStore.getState().setDevicesState
 
 export async function getPlaybackState(token: string) {
-	// await sleep(1000)
 	try {
 		const response = await fetch('https://api.spotify.com/v1/me/player', {
 			method: 'GET',
@@ -46,7 +40,7 @@ export async function getDevices(token: string) {
 		// Set devices state in store
 		setDevicesState(data)
 	} catch (error) {
-		console.error('Error:', error)
+		console.error('Error: ', error)
 	}
 }
 
@@ -66,7 +60,7 @@ export async function handleDeviceChange(deviceId: string, token: string) {
 		await getDevices(token)
 		return true
 	} catch (error) {
-		console.error('Error:', error)
+		console.error('Error: ', error)
 		return false
 	}
 }
@@ -82,7 +76,7 @@ export async function getRecentlyPlayed(token: string) {
 		const data = await response.json()
 		return data
 	} catch (error) {
-		console.error('Error:', error)
+		console.error('Error: ', error)
 	}
 }
 
@@ -104,7 +98,7 @@ export async function resumePlayback(token: string) {
 			}),
 		})
 	} catch (error) {
-		console.error('Error:', error)
+		console.error('Error: ', error)
 	}
 }
 export async function pausePlayback(token: string) {
@@ -117,8 +111,36 @@ export async function pausePlayback(token: string) {
 			},
 		})
 	} catch (error) {
-		console.error('Error:', error)
+		console.error('Error: ', error)
 	}
 }
 
 export function startNewPlayback(token: string) {}
+
+export async function playNextTrack(token: string, deviceId: string) {
+	try {
+		await fetch('https://api.spotify.com/v1/me/player/next', {
+			method: 'POST',
+			headers: {
+				Authorization: `Bearer ${token}`,
+				'Content-Type': 'application/json',
+			},
+		})
+	} catch (error) {
+		console.log('Error: ' + error)
+	}
+}
+
+export async function playPreviousTrack(token: string, deviceId: string) {
+	try {
+		await fetch('https://api.spotify.com/v1/me/player/previous', {
+			method: 'POST',
+			headers: {
+				Authorization: `Bearer ${token}`,
+				'Content-Type': 'application/json',
+			},
+		})
+	} catch (error) {
+		console.log('Error: ' + error)
+	}
+}

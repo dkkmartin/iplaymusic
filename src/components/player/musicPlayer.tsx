@@ -11,6 +11,8 @@ import {
 	getRecentlyPlayed,
 	handleDeviceChange,
 	pausePlayback,
+	playNextTrack,
+	playPreviousTrack,
 	resumePlayback,
 } from '@/lib/spotify/utils'
 import { Root } from '@/types/spotify/recentlyPlayed'
@@ -46,6 +48,16 @@ export const WebPlayback = ({ token }: { token: string }) => {
 	function handlePausePlayback() {
 		pausePlayback(token)
 		setPaused(true)
+	}
+
+	function handleNextTrack() {
+		if (!deviceId) return
+		playNextTrack(token, deviceId)
+	}
+
+	function handlePreviousTrack() {
+		if (!deviceId) return
+		playPreviousTrack(token, deviceId)
 	}
 
 	useEffect(() => {
@@ -213,15 +225,30 @@ export const WebPlayback = ({ token }: { token: string }) => {
 						<PlaybackChanger
 							className={playbackState?.device.id === deviceId ? 'text-green-600' : ''}
 						></PlaybackChanger>
+						{playbackState?.device.id === deviceId ? (
+							<Button
+								size={'icon'}
+								variant={'ghost'}
+								className="btn-spotify"
+								onClick={() => {
+									player.previousTrack()
+								}}
+							>
+								<ChevronsLeft></ChevronsLeft>
+							</Button>
+						) : (
+							<Button
+								size={'icon'}
+								variant={'ghost'}
+								className="btn-spotify"
+								onClick={() => {
+									handlePreviousTrack()
+								}}
+							>
+								<ChevronsLeft></ChevronsLeft>
+							</Button>
+						)}
 
-						<button
-							className="btn-spotify"
-							onClick={() => {
-								player.previousTrack()
-							}}
-						>
-							<ChevronsLeft></ChevronsLeft>
-						</button>
 						{isPaused ? (
 							<Button
 								size={'icon'}
@@ -245,15 +272,29 @@ export const WebPlayback = ({ token }: { token: string }) => {
 								<Pause></Pause>
 							</Button>
 						)}
-
-						<button
-							className="btn-spotify"
-							onClick={() => {
-								player.nextTrack()
-							}}
-						>
-							<ChevronsRight></ChevronsRight>
-						</button>
+						{playbackState?.device.id === deviceId ? (
+							<Button
+								size={'icon'}
+								variant={'ghost'}
+								className="btn-spotify"
+								onClick={() => {
+									player.nextTrack()
+								}}
+							>
+								<ChevronsRight></ChevronsRight>
+							</Button>
+						) : (
+							<Button
+								size={'icon'}
+								variant={'ghost'}
+								className="btn-spotify"
+								onClick={() => {
+									handleNextTrack()
+								}}
+							>
+								<ChevronsRight></ChevronsRight>
+							</Button>
+						)}
 					</div>
 				</section>
 			</>
