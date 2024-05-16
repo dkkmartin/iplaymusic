@@ -117,7 +117,7 @@ export async function pausePlayback(token: string) {
 
 export function startNewPlayback(token: string) {}
 
-export async function playNextTrack(token: string, deviceId: string) {
+export async function playNextTrack(token: string) {
 	try {
 		await fetch('https://api.spotify.com/v1/me/player/next', {
 			method: 'POST',
@@ -131,10 +131,24 @@ export async function playNextTrack(token: string, deviceId: string) {
 	}
 }
 
-export async function playPreviousTrack(token: string, deviceId: string) {
+export async function playPreviousTrack(token: string) {
 	try {
 		await fetch('https://api.spotify.com/v1/me/player/previous', {
 			method: 'POST',
+			headers: {
+				Authorization: `Bearer ${token}`,
+				'Content-Type': 'application/json',
+			},
+		})
+	} catch (error) {
+		console.log('Error: ' + error)
+	}
+}
+
+export async function togglePlaybackShuffle(token: string, bool: boolean) {
+	try {
+		await fetch(`https://api.spotify.com/v1/me/player/shuffle?state=${bool}`, {
+			method: 'PUT',
 			headers: {
 				Authorization: `Bearer ${token}`,
 				'Content-Type': 'application/json',
