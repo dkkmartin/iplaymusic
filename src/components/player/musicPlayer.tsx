@@ -14,6 +14,7 @@ import {
 	playNextTrack,
 	playPreviousTrack,
 	resumePlayback,
+	togglePlaybackShuffle,
 } from '@/lib/spotify/utils'
 import { Root } from '@/types/spotify/recentlyPlayed'
 import { Button } from '../ui/button'
@@ -29,7 +30,7 @@ export const WebPlayback = ({ token }: { token: string }) => {
 	async function handleResumePlayback() {
 		if (!deviceId) return
 
-		// If current device is the same as the device, resume playback on this device
+		// If current device is the same as this device, resume playback on this device
 		if (playbackState?.device.id === deviceId) {
 			resumePlayback(token)
 			setPaused(false)
@@ -52,12 +53,12 @@ export const WebPlayback = ({ token }: { token: string }) => {
 
 	function handleNextTrack() {
 		if (!deviceId) return
-		playNextTrack(token, deviceId)
+		playNextTrack(token)
 	}
 
 	function handlePreviousTrack() {
 		if (!deviceId) return
-		playPreviousTrack(token, deviceId)
+		playPreviousTrack(token)
 	}
 
 	useEffect(() => {
@@ -227,9 +228,9 @@ export const WebPlayback = ({ token }: { token: string }) => {
 						></PlaybackChanger>
 						{playbackState?.device.id === deviceId ? (
 							<Button
+								className="w-6"
 								size={'icon'}
 								variant={'ghost'}
-								className="btn-spotify"
 								onClick={() => {
 									player.previousTrack()
 								}}
@@ -238,9 +239,9 @@ export const WebPlayback = ({ token }: { token: string }) => {
 							</Button>
 						) : (
 							<Button
+								className="w-6"
 								size={'icon'}
 								variant={'ghost'}
-								className="btn-spotify"
 								onClick={() => {
 									handlePreviousTrack()
 								}}
@@ -251,9 +252,9 @@ export const WebPlayback = ({ token }: { token: string }) => {
 
 						{isPaused ? (
 							<Button
+								className="w-6"
 								size={'icon'}
 								variant={'ghost'}
-								className="btn-spotify"
 								onClick={() => {
 									handleResumePlayback()
 								}}
@@ -262,9 +263,9 @@ export const WebPlayback = ({ token }: { token: string }) => {
 							</Button>
 						) : (
 							<Button
+								className="w-6"
 								size={'icon'}
 								variant={'ghost'}
-								className="btn-spotify"
 								onClick={() => {
 									handlePausePlayback()
 								}}
@@ -274,9 +275,9 @@ export const WebPlayback = ({ token }: { token: string }) => {
 						)}
 						{playbackState?.device.id === deviceId ? (
 							<Button
+								className="w-6"
 								size={'icon'}
 								variant={'ghost'}
-								className="btn-spotify"
 								onClick={() => {
 									player.nextTrack()
 								}}
@@ -285,9 +286,9 @@ export const WebPlayback = ({ token }: { token: string }) => {
 							</Button>
 						) : (
 							<Button
+								className="w-6"
 								size={'icon'}
 								variant={'ghost'}
-								className="btn-spotify"
 								onClick={() => {
 									handleNextTrack()
 								}}
