@@ -13,9 +13,21 @@ import {
 	pausePlayback,
 	playNextTrack,
 	playPreviousTrack,
+	resumePlaybackRecentlyPlayed,
 	resumePlayback,
 	togglePlaybackShuffle,
 } from '@/lib/spotify/utils'
+import {
+	Drawer,
+	DrawerClose,
+	DrawerContent,
+	DrawerDescription,
+	DrawerFooter,
+	DrawerHeader,
+	DrawerTitle,
+	DrawerTrigger,
+} from '@/components/ui/drawer'
+
 import { Root } from '@/types/spotify/recentlyPlayed'
 import { Button } from '../ui/button'
 
@@ -28,20 +40,21 @@ export const WebPlayback = ({ token }: { token: string }) => {
 	const intervalIdRef = useRef<NodeJS.Timeout | null>(null)
 
 	async function handleResumePlayback() {
-		if (!deviceId) return
-
 		// If current device is the same as this device, resume playback on this device
 		if (playbackState?.device.id === deviceId) {
+			console.log('Resuming playback on this device')
 			resumePlayback(token)
 			setPaused(false)
-		} else if (playbackState?.is_playing) {
-			// If a device is playing, resume playback on that device
+		} else if (playbackState && playbackState?.device.id !== deviceId) {
+			// If player is another device, resume playback on that device
+			console.log('Resuming playback on another device')
 			resumePlayback(token)
 			setPaused(false)
 		} else {
-			// If no device is playing, change device to this and resume playback
-			await handleDeviceChange(deviceId, token)
-			resumePlayback(token)
+			// If no device is playing, change device to this and resume playback from last played track
+			console.log('Resuming playback on this device with context of last song')
+			await handleDeviceChange(deviceId!, token)
+			resumePlaybackRecentlyPlayed(token, deviceId!)
 			setPaused(false)
 		}
 	}
@@ -60,11 +73,6 @@ export const WebPlayback = ({ token }: { token: string }) => {
 		if (!deviceId) return
 		playPreviousTrack(token)
 	}
-
-	useEffect(() => {
-		if (isPaused) console.log('paused')
-		if (!isPaused) console.log('playing')
-	}, [isPaused])
 
 	// useEffect for watching the is_playing value
 	// This will get the playback state of any device playing for the first render
@@ -176,7 +184,7 @@ export const WebPlayback = ({ token }: { token: string }) => {
 	} else if (playbackState || recentlyPlayed) {
 		return (
 			<>
-				<section className="dark:bg-[#111625] bg-background p-2 flex gap-2 border-b border-t">
+				<section className="p-2 flex gap-2 border-b border-t">
 					{playbackState ? (
 						<Image
 							width={50}
