@@ -22,8 +22,8 @@ export default function HeaderNavigation() {
 				<ChevronLeft className="size-10"></ChevronLeft>
 			</Button>
 
-			<h1 className="text-lg font-light justify-self-center col-start-2">
-				{modiefiedPathname.toUpperCase()}
+			<h1 className="text-lg font-light justify-self-center col-start-2 uppercase">
+				{modiefiedPathname}
 			</h1>
 			<Link href="/search" className="justify-self-end col-start-3">
 				<Button aria-label="Search" variant={'ghost'} size={'icon'}>

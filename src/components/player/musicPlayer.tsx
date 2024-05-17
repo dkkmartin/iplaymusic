@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { useState, useEffect, useRef } from 'react'
 import { Play, Pause, ChevronsLeft, ChevronsRight, Headphones } from 'lucide-react'
 import PlaybackChanger from './playbackChanger'
+import PlayerDrawer from './playerDrawer'
 import { usePlaybackStore } from '@/lib/stores'
 import {
 	getPlaybackState,
@@ -13,6 +14,7 @@ import {
 	pausePlayback,
 	playNextTrack,
 	playPreviousTrack,
+	resumePlaybackRecentlyPlayed,
 	resumePlayback,
 	togglePlaybackShuffle,
 } from '@/lib/spotify/utils'
@@ -28,20 +30,18 @@ export const WebPlayback = ({ token }: { token: string }) => {
 	const intervalIdRef = useRef<NodeJS.Timeout | null>(null)
 
 	async function handleResumePlayback() {
-		if (!deviceId) return
-
 		// If current device is the same as this device, resume playback on this device
 		if (playbackState?.device.id === deviceId) {
 			resumePlayback(token)
 			setPaused(false)
-		} else if (playbackState?.is_playing) {
-			// If a device is playing, resume playback on that device
+		} else if (playbackState && playbackState?.device.id !== deviceId) {
+			// If player is another device, resume playback on that device
 			resumePlayback(token)
 			setPaused(false)
 		} else {
-			// If no device is playing, change device to this and resume playback
-			await handleDeviceChange(deviceId, token)
-			resumePlayback(token)
+			// If no device is playing, change device to this and resume playback from last played track
+			await handleDeviceChange(deviceId!, token)
+			resumePlaybackRecentlyPlayed(token, deviceId!)
 			setPaused(false)
 		}
 	}
@@ -60,11 +60,6 @@ export const WebPlayback = ({ token }: { token: string }) => {
 		if (!deviceId) return
 		playPreviousTrack(token)
 	}
-
-	useEffect(() => {
-		if (isPaused) console.log('paused')
-		if (!isPaused) console.log('playing')
-	}, [isPaused])
 
 	// useEffect for watching the is_playing value
 	// This will get the playback state of any device playing for the first render
@@ -133,6 +128,7 @@ export const WebPlayback = ({ token }: { token: string }) => {
 
 	// useEffect for handling music streaming and device creation
 	useEffect(() => {
+		// To not make duplicate scripts
 		if (document.querySelector('script[src="https://sdk.scdn.co/spotify-player.js"]')) return
 
 		const script = document.createElement('script')
@@ -161,8 +157,6 @@ export const WebPlayback = ({ token }: { token: string }) => {
 				console.log('Device ID has gone offline', device_id)
 			})
 
-			player.setName('iPlayMusic web player')
-
 			player.connect()
 
 			return () => {
@@ -176,52 +170,55 @@ export const WebPlayback = ({ token }: { token: string }) => {
 	} else if (playbackState || recentlyPlayed) {
 		return (
 			<>
-				<section className="dark:bg-[#111625] bg-background p-2 flex gap-2 border-b border-t">
-					{playbackState ? (
-						<Image
-							width={50}
-							height={50}
-							src={playbackState?.item?.album?.images[2].url}
-							className="rounded"
-							alt={`${playbackState.item.name} ${playbackState.item.type} cover`}
-						/>
-					) : recentlyPlayed ? (
-						<Image
-							width={50}
-							height={50}
-							src={recentlyPlayed?.items[0].track.album.images[2].url ?? ''}
-							className="rounded"
-							alt={`${recentlyPlayed?.items[0].track.name} ${recentlyPlayed?.items[0].track.type} cover`}
-						/>
-					) : null}
-
-					<div className="flex flex-col overflow-hidden justify-center">
+				<section className="p-2 flex gap-2 border-b border-t">
+					<PlayerDrawer token={token} className="flex gap-2">
 						{playbackState ? (
-							<Marquee speed={30} className="shadow-inner">
-								<div className="flex gap-2">
-									<p className="font-bold">{playbackState.item.name}</p>
-									<span>&#9679;</span>
-									<p className="font-bold">{playbackState.item.artists[0].name}</p>
-								</div>
-								<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-							</Marquee>
-						) : (
-							<Marquee speed={30} className="shadow-inner">
-								<div className="flex gap-2">
-									<p className="font-bold">{recentlyPlayed?.items[0].track.name}</p>
-									<span>&#9679;</span>
-									<p className="font-bold">{recentlyPlayed?.items[0].track.artists[0].name}</p>
-								</div>
-								<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-							</Marquee>
-						)}
-						{playbackState ? (
-							<div className="flex gap-1 items-center">
-								<Headphones className="size-3 text-green-600"></Headphones>
-								<p className="text-sm text-green-600">{playbackState.device.name}</p>
-							</div>
+							<Image
+								width={50}
+								height={50}
+								src={playbackState?.item?.album?.images[2].url}
+								className="rounded"
+								alt={`${playbackState.item.name} ${playbackState.item.type} cover`}
+							/>
+						) : recentlyPlayed ? (
+							<Image
+								width={50}
+								height={50}
+								src={recentlyPlayed?.items[0].track.album.images[2].url ?? ''}
+								className="rounded"
+								alt={`${recentlyPlayed?.items[0].track.name} ${recentlyPlayed?.items[0].track.type} cover`}
+							/>
 						) : null}
-					</div>
+
+						<div className="flex flex-col overflow-hidden max-w-[250px] justify-center">
+							{playbackState ? (
+								<Marquee speed={30}>
+									<div className="flex gap-2">
+										<p className="font-bold">{playbackState.item.name}</p>
+										<span>&#9679;</span>
+										<p className="font-bold">{playbackState.item.artists[0].name}</p>
+									</div>
+									<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+								</Marquee>
+							) : (
+								<Marquee speed={30} className="shadow-inner">
+									<div className="flex gap-2">
+										<p className="font-bold">{recentlyPlayed?.items[0].track.name}</p>
+										<span>&#9679;</span>
+										<p className="font-bold">{recentlyPlayed?.items[0].track.artists[0].name}</p>
+									</div>
+									<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+								</Marquee>
+							)}
+							{playbackState ? (
+								<div className="flex gap-1 items-center">
+									<Headphones className="size-3 text-green-600"></Headphones>
+									<p className="text-sm text-green-600">{playbackState.device.name}</p>
+								</div>
+							) : null}
+						</div>
+					</PlayerDrawer>
+
 					<div className="now-playing__side flex gap-2 items-center">
 						<PlaybackChanger
 							className={playbackState?.device.id === deviceId ? 'text-green-600' : ''}

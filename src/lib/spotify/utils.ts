@@ -56,12 +56,9 @@ export async function handleDeviceChange(deviceId: string, token: string) {
 				device_ids: [deviceId],
 			}),
 		})
-		await getPlaybackState(token)
-		await getDevices(token)
-		return true
+		getDevices(token)
 	} catch (error) {
 		console.error('Error: ', error)
-		return false
 	}
 }
 
@@ -80,13 +77,13 @@ export async function getRecentlyPlayed(token: string) {
 	}
 }
 
-export async function resumePlayback(token: string) {
+export async function resumePlaybackRecentlyPlayed(token: string, deviceId: string) {
 	try {
 		const recentlyPlayed: Root = await getRecentlyPlayed(token)
 		const startTime = usePlaybackStore.getState().playbackState?.progress_ms
 		const trackUri = recentlyPlayed.items[0].track.uri
 
-		await fetch('https://api.spotify.com/v1/me/player/play', {
+		await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
 			method: 'PUT',
 			headers: {
 				Authorization: `Bearer ${token}`,
@@ -101,6 +98,21 @@ export async function resumePlayback(token: string) {
 		console.error('Error: ', error)
 	}
 }
+
+export async function resumePlayback(token: string) {
+	try {
+		await fetch('https://api.spotify.com/v1/me/player/play', {
+			method: 'PUT',
+			headers: {
+				Authorization: `Bearer ${token}`,
+				'Content-Type': 'application/json',
+			},
+		})
+	} catch (error) {
+		console.error('Error: ', error)
+	}
+}
+
 export async function pausePlayback(token: string) {
 	try {
 		await fetch('https://api.spotify.com/v1/me/player/pause', {

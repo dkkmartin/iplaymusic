@@ -74,3 +74,31 @@
 		@apply bg-background text-foreground;
 	}
 }
+
+.animation-pulse1 {
+	animation: pulse1 2s infinite;
+}
+
+.animation-pulse2 {
+	animation: pulse2 2s infinite;
+}
+
+@keyframes pulse1 {
+	0% {
+		box-shadow: 0 0 0 5px rgba(255, 17, 104, 1);
+	}
+
+	70% {
+		box-shadow: 0 0 0 30px rgba(255, 17, 104, 0);
+	}
+}
+
+@keyframes pulse2 {
+	0% {
+		box-shadow: 0 0 0 0px rgba(255, 17, 104, 1);
+	}
+
+	70% {
+		box-shadow: 0 0 0 20px rgba(255, 17, 104, 0);
+	}
+}
