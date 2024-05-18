@@ -3,7 +3,7 @@
 import Marquee from 'react-fast-marquee'
 import Image from 'next/image'
 import { useState, useEffect, useRef } from 'react'
-import { Play, Pause, ChevronsLeft, ChevronsRight, Headphones } from 'lucide-react'
+import { Play, Pause, Headphones, SkipForward, SkipBack } from 'lucide-react'
 import PlaybackChanger from './playbackChanger'
 import PlayerDrawer from './playerDrawer'
 import { usePlaybackStore } from '@/lib/stores'
@@ -99,14 +99,14 @@ export const WebPlayback = ({ token }: { token: string }) => {
 					if (intervalIdRef.current) {
 						clearInterval(intervalIdRef.current)
 					}
-					intervalIdRef.current = setInterval(pollPlaybackState, 2000)
+					intervalIdRef.current = setInterval(pollPlaybackState, 1000)
 				}
 			} catch (error) {
 				console.error('Error getting playback state:', error)
 			}
 		}
 
-		intervalIdRef.current = setInterval(pollPlaybackState, 2000)
+		intervalIdRef.current = setInterval(pollPlaybackState, 1000)
 
 		return () => {
 			if (intervalIdRef.current) {
@@ -171,14 +171,26 @@ export const WebPlayback = ({ token }: { token: string }) => {
 		return (
 			<>
 				<section className="p-2 flex gap-2 border-b border-t">
-					<PlayerDrawer token={token} className="flex gap-2">
+					<PlayerDrawer
+						handleResumePlayback={handleResumePlayback}
+						handlePausePlayback={handlePausePlayback}
+						handleNextTrack={handleNextTrack}
+						handlePreviousTrack={handlePreviousTrack}
+						recentlyPlayed={recentlyPlayed ?? undefined}
+						isPaused={isPaused}
+						setPaused={setPaused}
+						player={player}
+						deviceId={deviceId ?? ''}
+						token={token}
+						className="flex gap-2"
+					>
 						{playbackState ? (
 							<Image
 								width={50}
 								height={50}
 								src={playbackState?.item?.album?.images[2].url}
 								className="rounded"
-								alt={`${playbackState.item.name} ${playbackState.item.type} cover`}
+								alt={`${playbackState?.item?.name} ${playbackState?.item?.type} cover`}
 							/>
 						) : recentlyPlayed ? (
 							<Image
@@ -219,7 +231,7 @@ export const WebPlayback = ({ token }: { token: string }) => {
 						</div>
 					</PlayerDrawer>
 
-					<div className="now-playing__side flex gap-2 items-center">
+					<div className="flex gap-2 items-center">
 						<PlaybackChanger
 							className={playbackState?.device.id === deviceId ? 'text-green-600' : ''}
 						></PlaybackChanger>
@@ -232,7 +244,7 @@ export const WebPlayback = ({ token }: { token: string }) => {
 									player.previousTrack()
 								}}
 							>
-								<ChevronsLeft></ChevronsLeft>
+								<SkipBack></SkipBack>
 							</Button>
 						) : (
 							<Button
@@ -243,7 +255,7 @@ export const WebPlayback = ({ token }: { token: string }) => {
 									handlePreviousTrack()
 								}}
 							>
-								<ChevronsLeft></ChevronsLeft>
+								<SkipBack></SkipBack>
 							</Button>
 						)}
 
@@ -279,7 +291,7 @@ export const WebPlayback = ({ token }: { token: string }) => {
 									player.nextTrack()
 								}}
 							>
-								<ChevronsRight></ChevronsRight>
+								<SkipForward></SkipForward>
 							</Button>
 						) : (
 							<Button
@@ -290,7 +302,7 @@ export const WebPlayback = ({ token }: { token: string }) => {
 									handleNextTrack()
 								}}
 							>
-								<ChevronsRight></ChevronsRight>
+								<SkipForward></SkipForward>
 							</Button>
 						)}
 					</div>
