@@ -170,3 +170,32 @@ export async function togglePlaybackShuffle(token: string, bool: boolean) {
 		console.log('Error: ' + error)
 	}
 }
+
+export async function playbackSeeker(token: string, position: number) {
+	try {
+		await fetch(`https://api.spotify.com/v1/me/player/seek?position_ms=${position}`, {
+			method: 'PUT',
+			headers: {
+				Authorization: `Bearer ${token}`,
+				'Content-Type': 'application/json',
+			},
+		})
+	} catch (error) {
+		console.log('Error: ' + error)
+	}
+}
+
+export async function getAudioAnalysis(token: string, trackId: string) {
+	try {
+		const response = await fetch(`https://api.spotify.com/v1/audio-analysis/${trackId}`, {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+		})
+		const data = await response.json()
+		return data
+	} catch (error) {
+		console.error('Error: ', error)
+	}
+}
