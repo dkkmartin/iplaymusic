@@ -41,7 +41,13 @@ export default async function Categories() {
 	}
 
 	function colorFunction(index: number) {
+		// Calculate the index for the color by taking the modulus of the current index and the length of the doubleColors array
+		// This ensures that the colorIndex will always be within the range of the doubleColors array
+		// So if index was 37 and doubleColors.length is 20, colorIndex would be 17 (because 37 % 20 = 17)
+
 		let colorIndex = index % doubleColors.length
+
+		// Return the color from the doubleColors array at the calculated index
 		return doubleColors[colorIndex]
 	}
 
