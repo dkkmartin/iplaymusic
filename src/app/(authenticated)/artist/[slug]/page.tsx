@@ -1,6 +1,6 @@
 import PageContent from '@/components/pages/pageContent'
 import { authOptions } from '@/lib/authOptions'
-import { Root as ArtistRoot } from '@/types/artist/albums'
+import { Root as ArtistRoot, Item } from '@/types/artist/albums'
 import { Root as ArtistDetails } from '@/types/artist/details'
 import { Root as ArtistTracks, Track } from '@/types/artist/tracks'
 import { getServerSession } from 'next-auth'
@@ -83,7 +83,33 @@ export default async function Artist({ params }: { params: { slug: string } }) {
 									height={64}
 									alt={`${track.name} ${track.type} cover`}
 								></Image>
-								<p className="overflow-hidden text-ellipsis text-nowrap">{track.name}</p>
+								<small className="text-base font-semibold leading-none overflow-hidden text-ellipsis text-nowrap">
+									{track.name}
+								</small>
+							</li>
+						))}
+					</ol>
+				</section>
+				<section className="pt-4">
+					<h3 className="scroll-m-20 pb-2 text-3xl font-semibold tracking-tight first:mt-0">
+						Albums
+					</h3>
+					<ol className="flex flex-col gap-4 py-2">
+						{artistAlbums?.items.map((album: Item, index: number) => (
+							<li className=" flex items-center gap-4" key={index}>
+								<Image
+									className="rounded"
+									src={album.images[1].url}
+									width={120}
+									height={120}
+									alt={`${album.name} cover`}
+								></Image>
+								<div className="flex flex-col">
+									<small className="text-base font-semibold leading-none overflow-ellipsis">
+										{album.name}
+									</small>
+									<p className="text-sm text-muted-foreground">{album.release_date.slice(0, 4)}</p>
+								</div>
 							</li>
 						))}
 					</ol>
