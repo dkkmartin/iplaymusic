@@ -7,5 +7,5 @@ interface PageContentProps {
 }
 
 export default function PageContent({ children, className }: PageContentProps) {
-	return <section className={cn('p-6 mb-16', className)}>{children}</section>
+	return <section className={cn('p-6 mb-32', className)}>{children}</section>
 }
