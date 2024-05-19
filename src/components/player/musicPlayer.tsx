@@ -18,7 +18,7 @@ import {
 	resumePlayback,
 	togglePlaybackShuffle,
 } from '@/lib/spotify/utils'
-import { Root } from '@/types/spotify/recentlyPlayed'
+import { Root } from '@/types/player/recentlyPlayed'
 import { Button } from '../ui/button'
 
 export const WebPlayback = ({ token }: { token: string }) => {
@@ -178,7 +178,6 @@ export const WebPlayback = ({ token }: { token: string }) => {
 						handlePreviousTrack={handlePreviousTrack}
 						recentlyPlayed={recentlyPlayed ?? undefined}
 						isPaused={isPaused}
-						setPaused={setPaused}
 						player={player}
 						deviceId={deviceId ?? ''}
 						token={token}
