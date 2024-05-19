@@ -107,7 +107,7 @@ export default function PlayerDrawer({
 						recentlyPlayed?.items[0]?.track?.album?.images[0]?.url
 					})`,
 				}}
-				className="h-screen rounded-none bg bg-cover bg-center bg-no-repeat text-white"
+				className="h-dvh rounded-none bg bg-cover bg-center bg-no-repeat text-white"
 			>
 				<DrawerHeader className="grid grid-cols-3 w-11/12 mx-auto">
 					<DrawerClose className="justify-self-start">
