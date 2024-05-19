@@ -1,5 +1,5 @@
 import { usePlaybackStore, useDeviceStore } from '@/lib/stores'
-import { Root } from '@/types/spotify/recentlyPlayed'
+import { Root } from '@/types/player/recentlyPlayed'
 
 const setPlaybackState = usePlaybackStore.getState().setPlaybackState
 const setDevicesState = useDeviceStore.getState().setDevicesState

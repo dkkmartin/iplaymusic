@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { SpotfiyPlayback } from '../svg/spotifyPlayback'
 import { Smartphone, Tv2, Headphones } from 'lucide-react'
-import { Device } from '@/types/spotify/devices'
+import { Device } from '@/types/player/devices'
 import { getDevices, getPlaybackState, handleDeviceChange } from '@/lib/spotify/utils'
 import { useSession } from 'next-auth/react'
 import { useDeviceStore } from '@/lib/stores'

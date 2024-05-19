@@ -19,9 +19,9 @@ import PageContent from '../pages/pageContent'
 import { getAudioAnalysis, playbackSeeker } from '@/lib/spotify/utils'
 import { BigPauseButton } from '../svg/bigPauseButton'
 import PlayerSeeker from './playerSeeker'
-import { Root as Analysis } from '@/types/spotify/analysis'
+import { Root as Analysis } from '@/types/player/analysis'
 import PlaybackChanger from './playbackChanger'
-import { Root as RecentlyPlayed } from '@/types/spotify/recentlyPlayed'
+import { Root as RecentlyPlayed } from '@/types/player/recentlyPlayed'
 
 export default function PlayerDrawer({
 	children,
@@ -30,7 +30,6 @@ export default function PlayerDrawer({
 	deviceId,
 	player,
 	isPaused,
-	setPaused,
 	recentlyPlayed,
 	handleResumePlayback,
 	handlePausePlayback,
@@ -43,7 +42,6 @@ export default function PlayerDrawer({
 	deviceId?: string
 	player: Spotify.Player
 	isPaused: boolean
-	setPaused: (newState: boolean) => void
 	recentlyPlayed?: RecentlyPlayed | undefined
 	handleResumePlayback: () => void
 	handlePausePlayback: () => void
@@ -105,11 +103,11 @@ export default function PlayerDrawer({
 			<DrawerContent
 				style={{
 					backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 1)), url(${
-						recentlyPlayed?.items[0]?.track?.album?.images[0]?.url ??
-						playbackState?.item?.album?.images[0].url
+						playbackState?.item?.album?.images[0].url ??
+						recentlyPlayed?.items[0]?.track?.album?.images[0]?.url
 					})`,
 				}}
-				className="h-screen rounded-none bg bg-cover bg-center bg-no-repeat text-white"
+				className="h-dvh rounded-none bg bg-cover bg-center bg-no-repeat text-white"
 			>
 				<DrawerHeader className="grid grid-cols-3 w-11/12 mx-auto">
 					<DrawerClose className="justify-self-start">

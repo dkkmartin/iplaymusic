@@ -1,6 +1,6 @@
 import { create } from 'zustand'
-import { Root as playbackRoot } from '@/types/spotify/playbackState'
-import { Root as deviceRoot } from '@/types/spotify/devices'
+import { Root as playbackRoot } from '@/types/player/playbackState'
+import { Root as deviceRoot } from '@/types/player/devices'
 
 type playbackStore = {
 	playbackState: playbackRoot | undefined

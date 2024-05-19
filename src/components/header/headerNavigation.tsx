@@ -8,10 +8,22 @@ import Link from 'next/link'
 export default function HeaderNavigation() {
 	const router = useRouter()
 	const pathname = usePathname()
-	const modiefiedPathname = pathname === '/' ? 'featured' : pathname.slice(1)
+	let modiefiedPathname
+
+	if (pathname === '/') {
+		modiefiedPathname = 'featured'
+	} else if (pathname.startsWith('/artist')) {
+		modiefiedPathname = 'artist'
+	} else {
+		modiefiedPathname = pathname.slice(1)
+	}
 
 	return (
-		<header className="grid grid-cols-3 items-center sticky top-2 z-10 m-auto rounded-full h-10 w-11/12 px-4 backdrop-blur-lg">
+		<header
+			className={`grid grid-cols-3 items-center z-10 rounded-full h-10 w-11/12 px-4 backdrop-blur-lg ${
+				pathname.startsWith('/artist') ? 'fixed m-auto left-0 right-0 top-2' : 'sticky top-2 m-auto'
+			}`}
+		>
 			<Button
 				aria-label="Go back"
 				className="justify-self-start"
