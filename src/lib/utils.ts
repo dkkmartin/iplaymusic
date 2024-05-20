@@ -8,3 +8,5 @@ export function cn(...inputs: ClassValue[]) {
 export const imageLoader = ({ src }: { src: string }) => {
 	return `${src}`
 }
+
+export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
