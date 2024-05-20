@@ -7,6 +7,7 @@ import { getServerSession } from 'next-auth'
 import { Badge } from '@/components/ui/badge'
 import Image from 'next/image'
 import NewPlaybackContainer from '@/components/player/newPlaybackContainer'
+import GradientText from '@/components/text/gradientHeading'
 
 export default async function Artist({ params }: { params: { slug: string } }) {
 	const session = await getServerSession(authOptions)
@@ -50,7 +51,7 @@ export default async function Artist({ params }: { params: { slug: string } }) {
 
 	return (
 		<div className="flex flex-col">
-			{artistDetails && (
+			{artistDetails?.images[0]?.url && (
 				<section
 					className="h-[400px] bg-cover bg-center bg-no-repeat flex flex-col justify-end px-6"
 					style={{
@@ -73,9 +74,7 @@ export default async function Artist({ params }: { params: { slug: string } }) {
 						))}
 				</div>
 				<section>
-					<h2 className="scroll-m-20 pb-2 text-3xl font-semibold tracking-tight first:mt-0">
-						Popular
-					</h2>
+					<GradientText headingSize="h2">Popular</GradientText>
 					<ol className="flex flex-col gap-2 py-2">
 						{artistTracks?.tracks.slice(0, 5).map((track: Track, index: number) => (
 							<NewPlaybackContainer key={index} token={session?.user.token ?? ''} uri={track.uri}>
@@ -96,9 +95,7 @@ export default async function Artist({ params }: { params: { slug: string } }) {
 					</ol>
 				</section>
 				<section className="pt-4">
-					<h3 className="scroll-m-20 pb-2 text-3xl font-semibold tracking-tight first:mt-0">
-						Albums
-					</h3>
+					<GradientText headingSize="h3">Albums</GradientText>
 					<ol className="flex flex-col gap-4 py-2">
 						{artistAlbums?.items.map((album: Item, index: number) => (
 							<li className=" flex items-center gap-4" key={index}>
