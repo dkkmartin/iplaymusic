@@ -48,6 +48,7 @@ export default function NewPlaybackContainer({
 	}
 
 	function handlePlayContext() {
+		console.log(contextUri, position)
 		if (!contextUri || !position) return
 		startNewPlaybackContext(token, contextUri, position)
 	}
