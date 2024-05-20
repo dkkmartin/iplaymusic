@@ -4,6 +4,8 @@ import { Root } from '@/types/player/recentlyPlayed'
 const setPlaybackState = usePlaybackStore.getState().setPlaybackState
 const setDevicesState = useDeviceStore.getState().setDevicesState
 
+export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
 export async function getPlaybackState(token: string) {
 	try {
 		const response = await fetch('https://api.spotify.com/v1/me/player', {
