@@ -2,12 +2,11 @@
 
 import {
 	handleDeviceChange,
-	sleep,
 	startNewPlaybackContext,
 	startNewPlaybackTrack,
 } from '@/lib/spotify/utils'
 import { useCurrentDeviceStore, usePlaybackStore } from '@/lib/stores'
-import { cn } from '@/lib/utils'
+import { cn, sleep } from '@/lib/utils'
 
 interface NewPlaybackProps {
 	children: React.ReactNode
@@ -26,8 +25,8 @@ export default function NewPlaybackContainer({
 	contextUri,
 	position,
 }: NewPlaybackProps) {
-	const playbackState = usePlaybackStore((state) => state.playbackState)
-	const currentDeviceState = useCurrentDeviceStore((state) => state.currentDevice)
+	const playbackState = usePlaybackStore((state) => state?.playbackState)
+	const currentDeviceState = useCurrentDeviceStore((state) => state?.currentDevice)
 
 	function handleClick() {
 		if (uri) handlePlayTrack()
@@ -41,7 +40,7 @@ export default function NewPlaybackContainer({
 			await handleDeviceChange(currentDeviceState, token)
 			// Have to sleep so device is changed before starting playback
 			// This is only needed if no playback device is set
-			await sleep(500)
+			await sleep(1000)
 			startNewPlaybackTrack(token, uri)
 		} else {
 			startNewPlaybackTrack(token, uri)
@@ -53,7 +52,7 @@ export default function NewPlaybackContainer({
 		startNewPlaybackContext(token, contextUri, position)
 	}
 
-	return playbackState?.item.uri === uri ? (
+	return playbackState?.item && playbackState?.item.uri === uri ? (
 		<div onClick={handleClick} className={cn('text-green-600', className)}>
 			{children}
 		</div>
