@@ -6,6 +6,7 @@ import { Root as ArtistTracks, Track } from '@/types/artist/tracks'
 import { getServerSession } from 'next-auth'
 import { Badge } from '@/components/ui/badge'
 import Image from 'next/image'
+import NewPlaybackContainer from '@/components/player/newPlaybackContainer'
 
 export default async function Artist({ params }: { params: { slug: string } }) {
 	const session = await getServerSession(authOptions)
@@ -49,16 +50,18 @@ export default async function Artist({ params }: { params: { slug: string } }) {
 
 	return (
 		<div className="flex flex-col">
-			<section
-				className="h-[400px] bg-cover bg-center bg-no-repeat flex flex-col justify-end px-6"
-				style={{
-					backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.8)), url(${artistDetails?.images[0]?.url})`,
-				}}
-			>
-				<h1 className="scroll-m-20 text-5xl font-extrabold tracking-tight text-white pb-2">
-					{artistDetails?.name}
-				</h1>
-			</section>
+			{artistDetails && (
+				<section
+					className="h-[400px] bg-cover bg-center bg-no-repeat flex flex-col justify-end px-6"
+					style={{
+						backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.8)), url(${artistDetails?.images[0]?.url})`,
+					}}
+				>
+					<h1 className="scroll-m-20 text-5xl font-extrabold tracking-tight text-white pb-2">
+						{artistDetails?.name}
+					</h1>
+				</section>
+			)}
 
 			<PageContent>
 				<div className="flex gap-2 flex-wrap justify-center pb-6">
@@ -75,18 +78,20 @@ export default async function Artist({ params }: { params: { slug: string } }) {
 					</h2>
 					<ol className="flex flex-col gap-2 py-2">
 						{artistTracks?.tracks.slice(0, 5).map((track: Track, index: number) => (
-							<li className=" flex items-center gap-4" key={index}>
-								<p>{index + 1}</p>
-								<Image
-									src={track.album.images[2].url}
-									width={64}
-									height={64}
-									alt={`${track.name} ${track.type} cover`}
-								></Image>
-								<small className="text-base font-semibold leading-none overflow-hidden text-ellipsis text-nowrap">
-									{track.name}
-								</small>
-							</li>
+							<NewPlaybackContainer key={index} token={session?.user.token ?? ''} uri={track.uri}>
+								<li className=" flex items-center gap-4">
+									<p>{index + 1}</p>
+									<Image
+										src={track.album.images[2].url}
+										width={64}
+										height={64}
+										alt={`${track.name} ${track.type} cover`}
+									></Image>
+									<small className="text-base font-semibold leading-none overflow-hidden text-ellipsis text-nowrap">
+										{track.name}
+									</small>
+								</li>
+							</NewPlaybackContainer>
 						))}
 					</ol>
 				</section>
