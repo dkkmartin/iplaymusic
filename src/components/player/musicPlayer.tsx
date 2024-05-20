@@ -26,7 +26,7 @@ export const WebPlayback = ({ token }: { token: string }) => {
 	const [player, setPlayer] = useState<Spotify.Player | null>(null)
 	const [recentlyPlayed, setRecentlyPlayed] = useState<Root | null>(null)
 	const [deviceId, setDeviceId] = useState<string | null>(null)
-	const playbackState = usePlaybackStore((state) => state.playbackState)
+	const playbackState = usePlaybackStore((state) => state?.playbackState)
 	const setCurrentDeviceState = useCurrentDeviceStore((state) => state.setCurrentDevice)
 	const intervalIdRef = useRef<NodeJS.Timeout | null>(null)
 
