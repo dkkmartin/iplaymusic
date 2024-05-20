@@ -4,7 +4,7 @@ import PageContent from '@/components/pages/pageContent'
 import { Input } from '@/components/ui/input'
 import { useSession } from 'next-auth/react'
 import { useState, useEffect, useCallback } from 'react'
-import { Root } from '@/types/search/search'
+import { Root, Item, Item2, Item3, Item4, Item5, Artists, Albums } from '@/types/search/search'
 import Image from 'next/image'
 import GradientText from '@/components/text/gradientHeading'
 import ButtonGroup from '@/components/ui/buttonGroup'
@@ -100,30 +100,58 @@ export default function Search() {
 							if (data[key]) {
 								return (
 									<div key={key} className="py-4">
-										<GradientText>{key}</GradientText>
-										<div className="grid grid-cols-2 gap-4">
-											{data[key].items.map((item: any, index: number) => (
-												<div key={index} className="overflow-hidden">
-													<Image
-														className="rounded-xl object-cover max-h-[182px] min-h-[182px]"
-														src={
-															item.album
-																? item.album.images[0]?.url
-																: item.images && item.images.length > 0
-																? item.images[0].url
-																: ''
-														}
-														width={182}
-														height={182}
-														alt={`${item.name} ${item.type} cover`}
-													/>
+										<GradientText>{key.toLocaleUpperCase()}</GradientText>
+										{key === 'artists' || key === 'ARTISTS' ? (
+											<div className="grid grid-cols-2 gap-4">
+												{data[key].items.map((item: Root, index: number) => (
+													<Link key={index} href={`/artist/${item.id}`}>
+														<div className="overflow-hidden">
+															<Image
+																className="rounded-xl object-cover max-h-[182px] min-h-[182px]"
+																src={
+																	item.album
+																		? item.album.images[0]?.url
+																		: item.images && item.images.length > 0
+																		? item.images[0].url
+																		: ''
+																}
+																width={182}
+																height={182}
+																alt={`${item.name} ${item.type} cover`}
+															/>
 
-													<h2 className="scroll-m-20 py-4 text-3xl font-semibold tracking-tight first:mt-0">
-														{item.name.length > 25 ? item.name.slice(0, 25) + '...' : item.name}
-													</h2>
-												</div>
-											))}
-										</div>
+															<h2 className="scroll-m-20 py-4 text-3xl font-semibold tracking-tight first:mt-0">
+																{item.name.length > 25 ? item.name.slice(0, 25) + '...' : item.name}
+															</h2>
+														</div>
+													</Link>
+												))}
+											</div>
+										) : (
+											<div className="grid grid-cols-2 gap-4">
+												{data[key].items.map((item: any, index: number) => (
+													<div key={index} className="overflow-hidden">
+														<Image
+															className="rounded-xl object-cover max-h-[182px] min-h-[182px]"
+															src={
+																item.album
+																	? item.album.images[0]?.url
+																	: item.images && item.images.length > 0
+																	? item.images[0].url
+																	: ''
+															}
+															width={182}
+															height={182}
+															alt={`${item.name} ${item.type} cover`}
+														/>
+
+														<h2 className="scroll-m-20 py-4 text-3xl font-semibold tracking-tight first:mt-0">
+															{item.name.length > 25 ? item.name.slice(0, 25) + '...' : item.name}
+														</h2>
+													</div>
+												))}
+											</div>
+										)}
 									</div>
 								)
 							}

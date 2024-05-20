@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react'
 import { Slider } from '@/components/ui/slider'
 import { playbackSeeker } from '@/lib/spotify/utils'
 import { usePlaybackStore } from '@/lib/stores'
+import { msToTime } from '@/lib/utils'
 
 export default function PlayerSeeker({ token }: { token: string }) {
-	const playbackState = usePlaybackStore((state) => state.playbackState)
+	const playbackState = usePlaybackStore((state) => state?.playbackState)
 	const [sliderValue, setSliderValue] = useState(playbackState?.progress_ms || 0)
 
 	useEffect(() => {
@@ -12,12 +13,6 @@ export default function PlayerSeeker({ token }: { token: string }) {
 			setSliderValue(playbackState?.progress_ms)
 		}
 	}, [playbackState])
-
-	const msToTime = (duration: number) => {
-		const minutes = Math.floor(duration / 60000)
-		const seconds = Number(((duration % 60000) / 1000).toFixed(0))
-		return minutes + ':' + (seconds < 10 ? '0' : '') + seconds
-	}
 
 	return (
 		<>

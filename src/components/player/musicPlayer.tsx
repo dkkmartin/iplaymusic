@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Play, Pause, Headphones, SkipForward, SkipBack } from 'lucide-react'
 import PlaybackChanger from './playbackChanger'
 import PlayerDrawer from './playerDrawer'
-import { usePlaybackStore } from '@/lib/stores'
+import { useCurrentDeviceStore, usePlaybackStore } from '@/lib/stores'
 import {
 	getPlaybackState,
 	getRecentlyPlayed,
@@ -26,7 +26,8 @@ export const WebPlayback = ({ token }: { token: string }) => {
 	const [player, setPlayer] = useState<Spotify.Player | null>(null)
 	const [recentlyPlayed, setRecentlyPlayed] = useState<Root | null>(null)
 	const [deviceId, setDeviceId] = useState<string | null>(null)
-	const playbackState = usePlaybackStore((state) => state.playbackState)
+	const playbackState = usePlaybackStore((state) => state?.playbackState)
+	const setCurrentDeviceState = useCurrentDeviceStore((state) => state.setCurrentDevice)
 	const intervalIdRef = useRef<NodeJS.Timeout | null>(null)
 
 	async function handleResumePlayback() {
@@ -150,6 +151,7 @@ export const WebPlayback = ({ token }: { token: string }) => {
 
 			player.addListener('ready', ({ device_id }) => {
 				setDeviceId(device_id)
+				setCurrentDeviceState(device_id)
 				console.log('Ready with Device ID', device_id)
 			})
 
@@ -163,7 +165,7 @@ export const WebPlayback = ({ token }: { token: string }) => {
 				player.disconnect()
 			}
 		}
-	}, [token])
+	}, [token, setCurrentDeviceState])
 
 	if (!player) {
 		return null

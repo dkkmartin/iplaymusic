@@ -127,7 +127,42 @@ export async function pausePlayback(token: string) {
 	}
 }
 
-export function startNewPlayback(token: string) {}
+export async function startNewPlaybackTrack(token: string, trackUri: string) {
+	try {
+		await fetch('https://api.spotify.com/v1/me/player/play', {
+			method: 'PUT',
+			headers: {
+				Authorization: `Bearer ${token}`,
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				uris: [trackUri],
+			}),
+		})
+	} catch (error) {
+		console.error('Error: ', error)
+	}
+}
+
+export async function startNewPlaybackContext(token: string, contextUri: string, position: number) {
+	try {
+		await fetch('https://api.spotify.com/v1/me/player/play', {
+			method: 'PUT',
+			headers: {
+				Authorization: `Bearer ${token}`,
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				context_uri: contextUri,
+				offset: {
+					position: position,
+				},
+			}),
+		})
+	} catch (error) {
+		console.error('Error: ', error)
+	}
+}
 
 export async function playNextTrack(token: string) {
 	try {

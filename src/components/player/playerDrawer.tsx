@@ -48,7 +48,7 @@ export default function PlayerDrawer({
 	handleNextTrack: () => void
 	handlePreviousTrack: () => void
 }) {
-	const playbackState = usePlaybackStore((state) => state.playbackState)
+	const playbackState = usePlaybackStore((state) => state?.playbackState)
 	const [artistImageSrc, setArtistImageSrc] = useState<string>('')
 	const [currentSongId, setCurrentSongId] = useState<string>('')
 	const [audioAnalysis, setAudioAnalysis] = useState<Analysis | undefined>()

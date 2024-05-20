@@ -14,6 +14,8 @@ export default function HeaderNavigation() {
 		modiefiedPathname = 'featured'
 	} else if (pathname.startsWith('/artist')) {
 		modiefiedPathname = 'artist'
+	} else if (pathname.startsWith('/album')) {
+		modiefiedPathname = 'album'
 	} else {
 		modiefiedPathname = pathname.slice(1)
 	}
