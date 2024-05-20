@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils'
 
 export default function PlaybackChanger({ className }: { className?: string }) {
 	const { data: session, status } = useSession()
-	const devicesState = useDeviceStore((state) => state.devicesState)
+	const devicesState = useDeviceStore((state) => state?.devicesState)
 
 	function handleMenuClick() {
 		if (status === 'authenticated') {
