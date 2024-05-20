@@ -2,12 +2,12 @@
 
 import {
 	handleDeviceChange,
+	sleep,
 	startNewPlaybackContext,
 	startNewPlaybackTrack,
 } from '@/lib/spotify/utils'
 import { useCurrentDeviceStore, usePlaybackStore } from '@/lib/stores'
 import { cn } from '@/lib/utils'
-import { useEffect } from 'react'
 
 interface NewPlaybackProps {
 	children: React.ReactNode
@@ -39,6 +39,9 @@ export default function NewPlaybackContainer({
 		if (!playbackState) {
 			if (!currentDeviceState) return
 			await handleDeviceChange(currentDeviceState, token)
+			// Have to sleep so device is changed before starting playback
+			// This is only needed if no playback device is set
+			await sleep(500)
 			startNewPlaybackTrack(token, uri)
 		} else {
 			startNewPlaybackTrack(token, uri)
