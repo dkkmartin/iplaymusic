@@ -1,22 +1,29 @@
 'use client'
 
 import PageContent from '@/components/pages/pageContent'
-import { Root as AlbumDetails } from '@/types/album/album'
+import { Root as AlbumDetails, Item } from '@/types/album/album'
 import Image from 'next/image'
 import { Root as ArtistDetails } from '@/types/artist/details'
 import { BigPlayButton } from '@/components/svg/bigPlayButton'
-import { usePlaybackStore } from '@/lib/stores'
+import { useCurrentDeviceStore, usePlaybackStore } from '@/lib/stores'
 import { BigPauseButton } from '@/components/svg/bigPauseButton'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState, useCallback } from 'react'
-import { pausePlayback, resumePlayback, startNewPlaybackContext } from '@/lib/spotify/utils'
+import {
+	handleDeviceChange,
+	pausePlayback,
+	resumePlayback,
+	startNewPlaybackContext,
+	startNewPlaybackTrack,
+} from '@/lib/spotify/utils'
 import NewPlaybackContainer from '@/components/player/newPlaybackContainer'
-import { msToTime } from '@/lib/utils'
+import { msToTime, sleep } from '@/lib/utils'
 
 export default function Album({ params }: { params: { slug: string } }) {
 	const slug = params.slug
 	const { data: session, status } = useSession()
 	const playbackState = usePlaybackStore((state) => state?.playbackState)
+	const currentDeviceState = useCurrentDeviceStore((state) => state?.currentDevice)
 	const [albumDetails, setAlbumDetails] = useState<AlbumDetails | undefined>()
 	const [artistDetails, setArtistDetails] = useState<ArtistDetails | undefined>()
 
@@ -25,13 +32,26 @@ export default function Album({ params }: { params: { slug: string } }) {
 		pausePlayback(session?.user.token)
 	}
 
-	function handlePlay() {
-		if (!session?.user.token) return
-		if (!albumDetails?.uri) return
-		if (playbackState?.context?.uri === albumDetails.uri) {
-			resumePlayback(session?.user.token)
+	async function handlePlay() {
+		if (!session?.user.token || !albumDetails?.uri) return
+
+		const token = session.user.token
+		const albumUri = albumDetails.uri
+
+		if (!playbackState) {
+			if (!currentDeviceState) return
+			await handleDeviceChange(currentDeviceState, token)
+			// Have to sleep so device is changed before starting playback
+			// This is only needed if no playback device is set
+			await sleep(1000)
+		}
+
+		if (playbackState?.context?.uri !== albumUri) {
+			startNewPlaybackContext(token, albumUri, 0)
+		} else if (!playbackState?.is_playing) {
+			resumePlayback(token)
 		} else {
-			startNewPlaybackContext(session?.user.token, albumDetails?.uri, 0)
+			startNewPlaybackTrack(token, albumUri)
 		}
 	}
 
@@ -43,7 +63,7 @@ export default function Album({ params }: { params: { slug: string } }) {
 		})
 		const data = await res.json()
 		return data
-	}, [slug, session]) // dependencies
+	}, [slug, session])
 
 	const getArtistDetails = useCallback(
 		async (id: string): Promise<ArtistDetails | undefined> => {
@@ -63,7 +83,7 @@ export default function Album({ params }: { params: { slug: string } }) {
 			const albumData = await getAlbumDetails()
 			setAlbumDetails(albumData)
 
-			if (albumData) {
+			if (albumData?.artists) {
 				const artistData = await getArtistDetails(albumData.artists[0].id)
 				setArtistDetails(artistData)
 			}
@@ -128,8 +148,13 @@ export default function Album({ params }: { params: { slug: string } }) {
 				</section>
 				<section>
 					<ol className="flex flex-col gap-4">
-						{albumDetails?.tracks.items.map((track: any, index: number) => (
-							<NewPlaybackContainer key={index} token={session?.user.token ?? ''} uri={track.uri}>
+						{albumDetails?.tracks.items.map((track: Item, index: number) => (
+							<NewPlaybackContainer
+								key={index}
+								token={session?.user.token ?? ''}
+								contextUri={albumDetails?.uri}
+								position={track.track_number}
+							>
 								<li className="grid grid-cols-[10px_3fr_0.4fr] gap-4 items-center">
 									<p>{index + 1}</p>
 									<div>
