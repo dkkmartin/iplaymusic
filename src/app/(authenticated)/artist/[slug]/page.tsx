@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import Image from 'next/image'
 import NewPlaybackContainer from '@/components/player/newPlaybackContainer'
 import GradientText from '@/components/text/gradientHeading'
+import Link from 'next/link'
 
 export default async function Artist({ params }: { params: { slug: string } }) {
 	const session = await getServerSession(authOptions)
@@ -98,21 +99,25 @@ export default async function Artist({ params }: { params: { slug: string } }) {
 					<GradientText headingSize="h3">Albums</GradientText>
 					<ol className="flex flex-col gap-4 py-2">
 						{artistAlbums?.items.map((album: Item, index: number) => (
-							<li className=" flex items-center gap-4" key={index}>
-								<Image
-									className="rounded"
-									src={album.images[1].url}
-									width={120}
-									height={120}
-									alt={`${album.name} cover`}
-								></Image>
-								<div className="flex flex-col">
-									<small className="text-base font-semibold leading-none overflow-ellipsis">
-										{album.name}
-									</small>
-									<p className="text-sm text-muted-foreground">{album.release_date.slice(0, 4)}</p>
-								</div>
-							</li>
+							<Link key={index} href={`/album/${album.id}`}>
+								<li className=" flex items-center gap-4">
+									<Image
+										className="rounded"
+										src={album.images[1].url}
+										width={120}
+										height={120}
+										alt={`${album.name} cover`}
+									></Image>
+									<div className="flex flex-col">
+										<small className="text-base font-semibold leading-none overflow-ellipsis">
+											{album.name}
+										</small>
+										<p className="text-sm text-muted-foreground">
+											{album.release_date.slice(0, 4)}
+										</p>
+									</div>
+								</li>
+							</Link>
 						))}
 					</ol>
 				</section>
