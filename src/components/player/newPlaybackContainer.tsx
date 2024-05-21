@@ -33,11 +33,11 @@ export default function NewPlaybackContainer({
 		if (contextUri) handlePlayContext()
 	}
 
-	async function handlePlayTrack() {
+	function handlePlayTrack() {
 		if (!uri) return
 		if (!playbackState) {
 			if (!currentDeviceState) return
-			await handleDeviceChange(currentDeviceState, token)
+			handleDeviceChange(currentDeviceState, token)
 			startNewPlaybackTrack(token, uri)
 		} else {
 			startNewPlaybackTrack(token, uri)
@@ -46,8 +46,13 @@ export default function NewPlaybackContainer({
 
 	function handlePlayContext() {
 		if (!contextUri || !position || !currentDeviceState) return
-		handleDeviceChange(currentDeviceState, token)
-		startNewPlaybackContext(token, contextUri, position)
+		if (!playbackState) {
+			if (!currentDeviceState) return
+			handleDeviceChange(currentDeviceState, token)
+			startNewPlaybackContext(token, contextUri, position)
+		} else {
+			startNewPlaybackContext(token, contextUri, position)
+		}
 	}
 
 	// Single track playback
