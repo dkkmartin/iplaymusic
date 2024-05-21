@@ -155,11 +155,13 @@ export default function Album({ params }: { params: { slug: string } }) {
 								contextUri={albumDetails?.uri}
 								position={track.track_number}
 							>
-								<li className="grid grid-cols-[10px_3fr_0.4fr] gap-4 items-center">
-									<p>{index + 1}</p>
+								<li className="grid grid-cols-[20px_minmax(100px,300px)_1fr] gap-4 items-center">
+									<p className="justify-self-end">{index + 1}</p>
 									<div>
 										<p className="font-semibold leading-none">{track.name}</p>
-										<p className="text-sm text-muted-foreground">{track.artists[0].name}</p>
+										<p className="text-sm text-muted-foreground truncate">
+											{track.artists.map((artist) => artist.name).join(', ')}
+										</p>
 									</div>
 									<p className="text-sm text-muted-foreground justify-self-end">
 										{msToTime(track.duration_ms)}
