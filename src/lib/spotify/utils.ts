@@ -155,7 +155,8 @@ export async function startNewPlaybackContext(token: string, contextUri: string,
 			body: JSON.stringify({
 				context_uri: contextUri,
 				offset: {
-					position: position,
+					// position is zero based
+					position: position - 1,
 				},
 			}),
 		})
