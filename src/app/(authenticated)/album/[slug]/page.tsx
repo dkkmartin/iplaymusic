@@ -17,7 +17,7 @@ import {
 	startNewPlaybackTrack,
 } from '@/lib/spotify/utils'
 import NewPlaybackContainer from '@/components/player/newPlaybackContainer'
-import { msToTime, sleep } from '@/lib/utils'
+import { msToTime } from '@/lib/utils'
 import Link from 'next/link'
 
 export default function Album({ params }: { params: { slug: string } }) {
