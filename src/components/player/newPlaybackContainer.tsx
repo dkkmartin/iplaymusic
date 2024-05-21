@@ -6,7 +6,7 @@ import {
 	startNewPlaybackTrack,
 } from '@/lib/spotify/utils'
 import { useCurrentDeviceStore, usePlaybackStore } from '@/lib/stores'
-import { cn, sleep } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 
 interface NewPlaybackProps {
 	children: React.ReactNode
@@ -33,14 +33,11 @@ export default function NewPlaybackContainer({
 		if (contextUri) handlePlayContext()
 	}
 
-	async function handlePlayTrack() {
+	function handlePlayTrack() {
 		if (!uri) return
 		if (!playbackState) {
 			if (!currentDeviceState) return
-			await handleDeviceChange(currentDeviceState, token)
-			// Have to sleep so device is changed before starting playback
-			// This is only needed if no playback device is set
-			await sleep(1000)
+			handleDeviceChange(currentDeviceState, token)
 			startNewPlaybackTrack(token, uri)
 		} else {
 			startNewPlaybackTrack(token, uri)
@@ -48,12 +45,30 @@ export default function NewPlaybackContainer({
 	}
 
 	function handlePlayContext() {
-		console.log(contextUri, position)
-		if (!contextUri || !position) return
-		startNewPlaybackContext(token, contextUri, position)
+		if (!contextUri || !position || !currentDeviceState) return
+		if (!playbackState) {
+			if (!currentDeviceState) return
+			handleDeviceChange(currentDeviceState, token)
+			startNewPlaybackContext(token, contextUri, position)
+		} else {
+			startNewPlaybackContext(token, contextUri, position)
+		}
 	}
 
-	return playbackState?.item && playbackState?.item.uri === uri ? (
+	// Single track playback
+	// If the playback state uri is the same as the uri prop, color it green
+	return !playbackState ? (
+		<div onClick={handleClick} className={className}>
+			{children}
+		</div>
+	) : playbackState.item?.uri === uri ? (
+		<div onClick={handleClick} className={cn('text-green-600', className)}>
+			{children}
+		</div>
+	) : // Album playback
+	// If the playback state album uri is the same as the contextUri prop
+	// and the playback state track number is the same as the position prop, color it green
+	playbackState.item?.album?.uri === contextUri && playbackState.item?.track_number === position ? (
 		<div onClick={handleClick} className={cn('text-green-600', className)}>
 			{children}
 		</div>

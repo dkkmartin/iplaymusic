@@ -10,6 +10,8 @@ import GradientText from '@/components/text/gradientHeading'
 import ButtonGroup from '@/components/ui/buttonGroup'
 import { useDebounce } from '@uidotdev/usehooks'
 import Link from 'next/link'
+import { startNewPlaybackTrack } from '@/lib/spotify/utils'
+import { usePlaybackStore } from '@/lib/stores'
 
 export default function Search() {
 	const [query, setQuery] = useState('')
@@ -18,6 +20,7 @@ export default function Search() {
 	const [dataHasFiltered, setDataHasFiltered] = useState(false)
 	const debouncedQuery = useDebounce(query, 200)
 	const { data: session, status } = useSession()
+	const playbackState = usePlaybackStore((state) => state?.playbackState)
 
 	function filterData(filter: string) {
 		if (!data) return
@@ -26,6 +29,11 @@ export default function Search() {
 		const filteredData = data[filter]
 		filteredData.label = filter
 		setFilteredData(filteredData)
+	}
+
+	function handleTrackClick(trackUri: string) {
+		if (!session?.user?.token) return
+		startNewPlaybackTrack(session?.user?.token, trackUri)
 	}
 
 	const searchQuery = useCallback(async () => {
@@ -101,10 +109,10 @@ export default function Search() {
 								return (
 									<div key={key} className="py-4">
 										<GradientText>{key.toLocaleUpperCase()}</GradientText>
-										{key === 'artists' || key === 'ARTISTS' ? (
+										{key !== 'tracks' ? (
 											<div className="grid grid-cols-2 gap-4">
 												{data[key].items.map((item: Root, index: number) => (
-													<Link key={index} href={`/artist/${item.id}`}>
+													<Link key={index} href={`/${item.type}/${item.id}`}>
 														<div className="overflow-hidden">
 															<Image
 																className="rounded-xl object-cover max-h-[182px] min-h-[182px]"
@@ -120,7 +128,7 @@ export default function Search() {
 																alt={`${item.name} ${item.type} cover`}
 															/>
 
-															<h2 className="scroll-m-20 py-4 text-3xl font-semibold tracking-tight first:mt-0">
+															<h2 className="scroll-m-20 py-4 text-3xl font-semibold tracking-tight">
 																{item.name.length > 25 ? item.name.slice(0, 25) + '...' : item.name}
 															</h2>
 														</div>
@@ -130,7 +138,11 @@ export default function Search() {
 										) : (
 											<div className="grid grid-cols-2 gap-4">
 												{data[key].items.map((item: any, index: number) => (
-													<div key={index} className="overflow-hidden">
+													<div
+														onClick={() => handleTrackClick(item.uri)}
+														key={index}
+														className="overflow-hidden"
+													>
 														<Image
 															className="rounded-xl object-cover max-h-[182px] min-h-[182px]"
 															src={
@@ -144,9 +156,8 @@ export default function Search() {
 															height={182}
 															alt={`${item.name} ${item.type} cover`}
 														/>
-
-														<h2 className="scroll-m-20 py-4 text-3xl font-semibold tracking-tight first:mt-0">
-															{item.name.length > 25 ? item.name.slice(0, 25) + '...' : item.name}
+														<h2 className="scroll-m-20 py-4 text-3xl font-semibold tracking-tight">
+															{item.name}
 														</h2>
 													</div>
 												))}
@@ -160,26 +171,53 @@ export default function Search() {
 							<>
 								<GradientText>{filteredData.label?.toUpperCase() ?? ''}</GradientText>
 								<section className="grid grid-cols-2 gap-4">
-									{filteredData.items.map((item: any, index: number) => (
-										<div key={index} className="overflow-hidden">
-											<Image
-												className="rounded-xl object-cover max-h-[182px] min-h-[182px]"
-												src={
-													item.album
-														? item.album.images[0]?.url
-														: item.images && item.images.length > 0
-														? item.images[0].url
-														: ''
-												}
-												width={182}
-												height={182}
-												alt={`${item.name} ${item.type} cover`}
-											/>
-											<h2 className="scroll-m-20 py-4 text-3xl font-semibold tracking-tight first:mt-0">
-												{item.name.length > 25 ? item.name.slice(0, 25) + '...' : item.name}
-											</h2>
-										</div>
-									))}
+									{filteredData.items.map((item: any, index: number) =>
+										item.type === 'artist' || item.type === 'album' || item.type === 'playlist' ? (
+											<Link key={index} href={`/${item.type}/${item.id}`}>
+												<div className="overflow-hidden">
+													<Image
+														className="rounded-xl object-cover max-h-[182px] min-h-[182px]"
+														src={
+															item.album
+																? item.album.images[0]?.url
+																: item.images && item.images.length > 0
+																? item.images[0].url
+																: ''
+														}
+														width={182}
+														height={182}
+														alt={`${item.name} ${item.type} cover`}
+													/>
+													<h2 className="scroll-m-20 py-4 text-3xl font-semibold tracking-tight ">
+														{item.name.length > 25 ? item.name.slice(0, 25) + '...' : item.name}
+													</h2>
+												</div>
+											</Link>
+										) : (
+											<div
+												onClick={() => handleTrackClick(item.uri)}
+												key={index}
+												className="overflow-hidden"
+											>
+												<Image
+													className="rounded-xl object-cover max-h-[182px] min-h-[182px]"
+													src={
+														item.album
+															? item.album.images[0]?.url
+															: item.images && item.images.length > 0
+															? item.images[0].url
+															: ''
+													}
+													width={182}
+													height={182}
+													alt={`${item.name} ${item.type} cover`}
+												/>
+												<h2 className="scroll-m-20 py-4 text-3xl font-semibold tracking-tight">
+													{item.name}
+												</h2>
+											</div>
+										)
+									)}
 								</section>
 							</>
 					  )}

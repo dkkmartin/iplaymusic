@@ -17,7 +17,8 @@ import {
 	startNewPlaybackTrack,
 } from '@/lib/spotify/utils'
 import NewPlaybackContainer from '@/components/player/newPlaybackContainer'
-import { msToTime, sleep } from '@/lib/utils'
+import { msToTime } from '@/lib/utils'
+import Link from 'next/link'
 
 export default function Album({ params }: { params: { slug: string } }) {
 	const slug = params.slug
@@ -32,7 +33,7 @@ export default function Album({ params }: { params: { slug: string } }) {
 		pausePlayback(session?.user.token)
 	}
 
-	async function handlePlay() {
+	function handlePlay() {
 		if (!session?.user.token || !albumDetails?.uri) return
 
 		const token = session.user.token
@@ -40,10 +41,7 @@ export default function Album({ params }: { params: { slug: string } }) {
 
 		if (!playbackState) {
 			if (!currentDeviceState) return
-			await handleDeviceChange(currentDeviceState, token)
-			// Have to sleep so device is changed before starting playback
-			// This is only needed if no playback device is set
-			await sleep(1000)
+			handleDeviceChange(currentDeviceState, token)
 		}
 
 		if (playbackState?.context?.uri !== albumUri) {
@@ -110,16 +108,18 @@ export default function Album({ params }: { params: { slug: string } }) {
 								{albumDetails?.name}
 							</h1>
 							<div className="flex flex-col gap-2">
-								<div className="flex gap-2 items-center">
-									<Image
-										className="rounded-full object-cover h-[30px] w-[30px]"
-										src={artistDetails.images && artistDetails?.images[2]?.url}
-										width={30}
-										height={30}
-										alt={`${albumDetails.name} album cover`}
-									/>
-									<p className="text-sm font-semibold leading-none">{artistDetails?.name}</p>
-								</div>
+								<Link href={`/artist/${artistDetails.id}`}>
+									<div className="flex gap-2 items-center">
+										<Image
+											className="rounded-full object-cover h-[30px] w-[30px]"
+											src={artistDetails.images && artistDetails?.images[2]?.url}
+											width={30}
+											height={30}
+											alt={`${albumDetails.name} album cover`}
+										/>
+										<p className="text-sm font-semibold leading-none">{artistDetails?.name}</p>
+									</div>
+								</Link>
 								<div className="flex gap-2 items-center">
 									<p className="text-sm text-muted-foreground capitalize">
 										{albumDetails?.album_type}
@@ -155,11 +155,13 @@ export default function Album({ params }: { params: { slug: string } }) {
 								contextUri={albumDetails?.uri}
 								position={track.track_number}
 							>
-								<li className="grid grid-cols-[10px_3fr_0.4fr] gap-4 items-center">
-									<p>{index + 1}</p>
+								<li className="grid grid-cols-[20px_minmax(100px,300px)_1fr] gap-4 items-center">
+									<p className="justify-self-end">{index + 1}</p>
 									<div>
 										<p className="font-semibold leading-none">{track.name}</p>
-										<p className="text-sm text-muted-foreground">{track.artists[0].name}</p>
+										<p className="text-sm text-muted-foreground truncate">
+											{track.artists.map((artist) => artist.name).join(', ')}
+										</p>
 									</div>
 									<p className="text-sm text-muted-foreground justify-self-end">
 										{msToTime(track.duration_ms)}
