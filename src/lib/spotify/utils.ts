@@ -147,7 +147,7 @@ export async function startNewPlaybackTrack(token: string, trackUri: string) {
 			})
 
 			// If the response status is one of the expected status codes or attempts is greater than maxAttempts, clear the interval
-			if ([202, 401, 403, 429].includes(response.status) || attempts >= maxAttempts) {
+			if ([202, 204, 401, 403, 429].includes(response.status) || attempts >= maxAttempts) {
 				clearInterval(intervalId)
 			}
 		} catch (error) {
@@ -195,7 +195,7 @@ export async function startNewPlaybackContext(token: string, contextUri: string,
 			})
 
 			// If the response status is one of the expected status codes or attempts is greater than maxAttempts, clear the interval
-			if ([202, 401, 403, 429].includes(response.status) || attempts >= maxAttempts) {
+			if ([202, 204, 401, 403, 429].includes(response.status) || attempts >= maxAttempts) {
 				clearInterval(intervalId)
 			}
 		} catch (error) {
