@@ -185,7 +185,7 @@ export const WebPlayback = ({ token }: { token: string }) => {
 						token={token}
 						className="flex gap-2"
 					>
-						{playbackState ? (
+						{playbackState && playbackState.item ? (
 							<Image
 								width={50}
 								height={50}
