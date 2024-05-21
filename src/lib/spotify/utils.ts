@@ -2,6 +2,7 @@ import { usePlaybackStore, useDeviceStore } from '@/lib/stores'
 import { Root } from '@/types/player/recentlyPlayed'
 
 const setPlaybackState = usePlaybackStore.getState().setPlaybackState
+const playbackState = usePlaybackStore.getState().playbackState
 const setDevicesState = useDeviceStore.getState().setDevicesState
 
 export async function getPlaybackState(token: string) {
@@ -128,40 +129,87 @@ export async function pausePlayback(token: string) {
 }
 
 export async function startNewPlaybackTrack(token: string, trackUri: string) {
-	try {
-		await fetch('https://api.spotify.com/v1/me/player/play', {
-			method: 'PUT',
-			headers: {
-				Authorization: `Bearer ${token}`,
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
-				uris: [trackUri],
-			}),
-		})
-	} catch (error) {
-		console.error('Error: ', error)
+	let intervalId: NodeJS.Timeout
+	let attempts = 0
+	const maxAttempts = 10
+
+	const startPlayback = async () => {
+		try {
+			const response = await fetch('https://api.spotify.com/v1/me/player/play', {
+				method: 'PUT',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					uris: [trackUri],
+				}),
+			})
+
+			// If the response status is one of the expected status codes or attempts is greater than maxAttempts, clear the interval
+			if ([202, 401, 403, 429].includes(response.status) || attempts >= maxAttempts) {
+				clearInterval(intervalId)
+			}
+		} catch (error) {
+			console.error('Error: ', error)
+		} finally {
+			attempts++
+		}
+	}
+
+	// If no playback state, set an interval to run the startPlayback function every second
+	if (!playbackState) {
+		intervalId = setInterval(startPlayback, 1000)
+	} else {
+		await startPlayback()
 	}
 }
 
 export async function startNewPlaybackContext(token: string, contextUri: string, position: number) {
-	try {
-		await fetch('https://api.spotify.com/v1/me/player/play', {
-			method: 'PUT',
-			headers: {
-				Authorization: `Bearer ${token}`,
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
-				context_uri: contextUri,
-				offset: {
-					// position is zero based
-					position: position - 1,
+	let intervalId: NodeJS.Timeout
+	let attempts = 0
+	const maxAttempts = 10
+
+	// If position is not provided, set it to 0
+	if (!position) {
+		position = 0
+	} else {
+		// position is zero based so subtract 1 from it
+		position -= 1
+	}
+
+	const startPlayback = async () => {
+		try {
+			const response = await fetch('https://api.spotify.com/v1/me/player/play', {
+				method: 'PUT',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json',
 				},
-			}),
-		})
-	} catch (error) {
-		console.error('Error: ', error)
+				body: JSON.stringify({
+					context_uri: contextUri,
+					offset: {
+						position: position,
+					},
+				}),
+			})
+
+			// If the response status is one of the expected status codes or attempts is greater than maxAttempts, clear the interval
+			if ([202, 401, 403, 429].includes(response.status) || attempts >= maxAttempts) {
+				clearInterval(intervalId)
+			}
+		} catch (error) {
+			console.error('Error: ', error)
+		} finally {
+			attempts++
+		}
+	}
+
+	// If no playback state, set an interval to run the startPlayback function every second
+	if (!playbackState) {
+		intervalId = setInterval(startPlayback, 1000)
+	} else {
+		await startPlayback()
 	}
 }
 
