@@ -22,6 +22,7 @@ import PlayerSeeker from './playerSeeker'
 import { Root as Analysis } from '@/types/player/analysis'
 import PlaybackChanger from './playbackChanger'
 import { Root as RecentlyPlayed } from '@/types/player/recentlyPlayed'
+import Link from 'next/link'
 
 export default function PlayerDrawer({
 	children,
@@ -120,13 +121,15 @@ export default function PlayerDrawer({
 				<PageContent className="mb-0 flex flex-col justify-around h-full">
 					<section className="w-full flex justify-center">
 						{playbackState && (
-							<Image
-								src={artistImageSrc}
-								width={200}
-								height={200}
-								className="rounded-full object-cover max-h-[200px] shadow-xl"
-								alt={`${playbackState?.item?.artists[0]?.name} ${playbackState?.item?.artists[0]?.type} cover`}
-							></Image>
+							<Link href={`/artist/${playbackState?.item?.artists[0].id}`}>
+								<Image
+									src={artistImageSrc}
+									width={200}
+									height={200}
+									className="rounded-full object-cover max-h-[200px] shadow-xl"
+									alt={`${playbackState?.item?.artists[0]?.name} ${playbackState?.item?.artists[0]?.type} cover`}
+								></Image>
+							</Link>
 						)}
 					</section>
 					{playbackState ? (
@@ -134,9 +137,16 @@ export default function PlayerDrawer({
 							<h2 className="scroll-m-20 pb-2 text-2xl font-bold tracking-tight first:mt-0">
 								{playbackState?.item?.name}
 							</h2>
-							<h3 className="scroll-m-20 text-xl font-light tracking-tight">
-								{playbackState?.item?.artists[0]?.name}
-							</h3>
+							<div className="flex gap-2">
+								{playbackState?.item?.artists.map((artist, index: number) => (
+									<Link href={`/artist/${artist.id}`} key={index}>
+										<h3 className="scroll-m-20 text-xl font-light tracking-tight truncate">
+											{artist.name}
+											{index < playbackState.item.artists.length - 1 ? ',' : ''}
+										</h3>
+									</Link>
+								))}
+							</div>
 						</section>
 					) : recentlyPlayed ? (
 						<section className="flex flex-col justify-center items-center text-center">
