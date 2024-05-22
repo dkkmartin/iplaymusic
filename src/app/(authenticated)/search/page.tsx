@@ -4,14 +4,14 @@ import PageContent from '@/components/pages/pageContent'
 import { Input } from '@/components/ui/input'
 import { useSession } from 'next-auth/react'
 import { useState, useEffect, useCallback } from 'react'
-import { Root, Item, Item2, Item3, Item4, Item5, Artists, Albums } from '@/types/search/search'
+import { Root } from '@/types/search/search'
 import Image from 'next/image'
 import GradientText from '@/components/text/gradientHeading'
 import ButtonGroup from '@/components/ui/buttonGroup'
 import { useDebounce } from '@uidotdev/usehooks'
 import Link from 'next/link'
-import { startNewPlaybackTrack } from '@/lib/spotify/utils'
-import { usePlaybackStore } from '@/lib/stores'
+import { handleDeviceChange, startNewPlaybackTrack } from '@/lib/spotify/utils'
+import { useCurrentDeviceStore, usePlaybackStore } from '@/lib/stores'
 
 export default function Search() {
 	const [query, setQuery] = useState('')
@@ -21,6 +21,7 @@ export default function Search() {
 	const debouncedQuery = useDebounce(query, 200)
 	const { data: session, status } = useSession()
 	const playbackState = usePlaybackStore((state) => state?.playbackState)
+	const currentDeviceState = useCurrentDeviceStore((state) => state?.currentDevice)
 
 	function filterData(filter: string) {
 		if (!data) return
@@ -33,7 +34,13 @@ export default function Search() {
 
 	function handleTrackClick(trackUri: string) {
 		if (!session?.user?.token) return
-		startNewPlaybackTrack(session?.user?.token, trackUri)
+		if (!playbackState) {
+			if (!currentDeviceState) return
+			handleDeviceChange(currentDeviceState, session?.user.token)
+			startNewPlaybackTrack(session?.user.token, trackUri)
+		} else {
+			startNewPlaybackTrack(session?.user.token, trackUri)
+		}
 	}
 
 	const searchQuery = useCallback(async () => {
