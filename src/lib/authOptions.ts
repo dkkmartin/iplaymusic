@@ -21,49 +21,58 @@ export const authOptions: NextAuthOptions = {
 	callbacks: {
 		async jwt({ token, account }) {
 			if (account) {
-				token = Object.assign({}, token, {
+				// Save the access token and refresh token in the JWT on the initial login, as well as the user details
+				return {
 					access_token: account.access_token,
-					refresh_token: account.refresh_token,
 					expires_at: account.expires_at,
-				})
-			}
+					refresh_token: account.refresh_token,
+					user: token,
+				}
+			} else if (Date.now() < token.expires_at * 1000) {
+				// If the access token has not expired yet, return it
+				return token
+			} else {
+				if (!token.refresh_token) throw new Error('Missing refresh token')
 
-			// check if the token has expired
-			if (token.expires_at && Date.now() > Number(token.expires_at) * 1000 - 60 * 60 * 1000) {
-				console.log('Token expired. Fetching a new one...')
-				const res = await fetch('https://accounts.spotify.com/api/token', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-					body: new URLSearchParams({
-						grant_type: 'refresh_token',
-						refresh_token: token.refresh_token as string, // ensure refresh_token is of type string
-						client_id: process.env.SPOTIFY_CLIENT_ID as string,
-						client_secret: process.env.SPOTIFY_CLIENT_SECRET as string,
-					}),
-				})
-
-				const data = await res.json()
-
-				if (data.error) {
-					console.error(data.error)
-				} else {
-					token = Object.assign({}, token, {
-						access_token: data.access_token,
-						expires_at: data.expires_in ? Date.now() / 1000 + data.expires_in : token.expires_at,
+				// If the access token has expired, try to refresh it
+				try {
+					// We need the `token_endpoint`.
+					const response = await fetch('https://accounts.spotify.com/api/token', {
+						headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+						body: new URLSearchParams({
+							client_id: process.env.SPOTIFY_CLIENT_ID!,
+							client_secret: process.env.SPOTIFY_CLIENT_SECRET!,
+							grant_type: 'refresh_token',
+							refresh_token: token.refresh_token,
+						}),
+						method: 'POST',
 					})
+
+					const tokens = await response.json()
+
+					if (!response.ok) throw tokens
+
+					return {
+						...token, // Keep the previous token properties
+						access_token: tokens.access_token,
+						expires_at: Math.floor(Date.now() / 1000 + tokens.expires_in),
+						// Fall back to old refresh token, but note that
+						// many providers may only allow using a refresh token once.
+						refresh_token: tokens.refresh_token ?? token.refresh_token,
+					}
+				} catch (error) {
+					console.error('Error refreshing access token', error)
+					// The error property will be used client-side to handle the refresh token error
+					return { ...token, error: 'RefreshAccessTokenError' as const }
 				}
 			}
-
-			return token
 		},
 		async session({ session, token }) {
-			if (session) {
-				session.user = Object.assign({}, session.user, {
-					token: token.access_token,
-					expires_at: token.expires_at,
-				})
+			session.error = token.error
+			return {
+				...session,
+				...token,
 			}
-			return session
 		},
 	},
 }
