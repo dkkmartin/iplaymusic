@@ -136,12 +136,12 @@ export default function Album({ params }: { params: { slug: string } }) {
 						playbackState?.is_playing ? (
 							<BigPauseButton
 								onClick={handlePause}
-								className="size-24 px-3 dark:bg-[#111625] dark:border-white border-black border-2 rounded-full"
+								className="size-24 px-3 dark:bg-[#111625] dark:border-white border-black border-2 rounded-full min-w-[96px]"
 							></BigPauseButton>
 						) : (
 							<BigPlayButton
 								onClick={handlePlay}
-								className="size-24 pl-3 dark:bg-[#111625] dark:border-white border-black border-2 rounded-full"
+								className="size-24 pl-3 dark:bg-[#111625] dark:border-white border-black border-2 rounded-full min-w-[96px]"
 							></BigPlayButton>
 						)}
 					</div>
