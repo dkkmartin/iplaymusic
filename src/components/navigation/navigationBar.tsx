@@ -27,7 +27,7 @@ export default function NavigationBar({ className }: { className?: string }) {
 					</Button>
 				</div>
 			</Link>
-			<Link href={'/playlist'}>
+			<Link href={'/featured-playlists'}>
 				<Button variant="ghost">
 					<IonIosContrast className="size-7" />
 				</Button>
