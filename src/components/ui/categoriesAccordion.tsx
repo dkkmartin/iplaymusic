@@ -13,6 +13,7 @@ import ButtonGroup from './buttonGroup'
 import { useCallback, useEffect, useState } from 'react'
 import { imageLoader } from '@/lib/utils'
 import Loading from '@/app/(authenticated)/loading'
+import Link from 'next/link'
 
 export default function CategoriesAccordion({
 	color,
@@ -98,19 +99,28 @@ export default function CategoriesAccordion({
 								(data.playlists || data.tracks || data.artists || data.albums) &&
 								Object.keys(data).map((key) => {
 									return data[key].items.map((item: any, index: number) => (
-										<div key={index}>
-											<Image
-												loader={imageLoader}
-												className="rounded-xl dark:border-white"
-												src={item.album ? item.album.images[0].url : item.images[0].url}
-												width={364}
-												height={364}
-												alt={item.type + ' cover'}
-											/>
-											<h2 className="scroll-m-20 border-b py-4 text-3xl font-semibold tracking-tight first:mt-0">
-												{item.name}
-											</h2>
-										</div>
+										<Link
+											key={index}
+											href={
+												item.type === 'track'
+													? `/album/${item.album.id}`
+													: `/${item.type}/${item.id}`
+											}
+										>
+											<div>
+												<Image
+													loader={imageLoader}
+													className="rounded-xl dark:border-white"
+													src={item.album ? item?.album?.images[0]?.url : item?.images[0]?.url}
+													width={364}
+													height={364}
+													alt={item.type + ' cover'}
+												/>
+												<h2 className="scroll-m-20 border-b py-4 text-3xl font-semibold tracking-tight first:mt-0">
+													{item.name}
+												</h2>
+											</div>
+										</Link>
 									))
 								})}
 						</>

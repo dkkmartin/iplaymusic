@@ -29,7 +29,7 @@ export const authOptions: NextAuthOptions = {
 			}
 
 			// check if the token has expired
-			if (token.expires_at && Date.now() > Number(token.expires_at) * 1000 - 60 * 60 * 1000) {
+			if (token.expires_at && Date.now() > Number(token.expires_at) * 1000 - 30 * 60 * 1000) {
 				console.log('Token expired. Fetching a new one...')
 				const res = await fetch('https://accounts.spotify.com/api/token', {
 					method: 'POST',

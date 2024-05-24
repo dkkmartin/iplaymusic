@@ -20,7 +20,7 @@ export default function NavigationBar({ className }: { className?: string }) {
 					<IonIosMicrophone className="size-7" />
 				</Button>
 			</Link>
-			<Link href={'/'}>
+			<Link href={'/recommender'}>
 				<div className="size-11 flex justify-center items-center relative bg-gradient-to-r from-[#EE0979] from-10% to-[#FF6A00] to-90% z-0 rounded-full">
 					<Button variant="ghost" className="p-0">
 						<IonMdWifi className="relative size-8 z-10" />
