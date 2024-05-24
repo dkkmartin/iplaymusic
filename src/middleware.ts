@@ -33,12 +33,12 @@ export const middleware: NextMiddleware = async (request: NextRequest) => {
 
 	const response = NextResponse.next()
 
-	if (shouldUpdateToken(session.accessToken)) {
+	if (shouldUpdateToken(session.accessToken as string)) {
 		// Here yoy retrieve the new access token from your custom backend
 		const newAccessToken = 'Session updated server side!!'
 
 		const newSessionToken = await encode({
-			secret: process.env.NEXTAUTH_SECRET,
+			secret: process.env.NEXTAUTH_SECRET || '',
 			token: {
 				...session,
 				accessToken: newAccessToken,
