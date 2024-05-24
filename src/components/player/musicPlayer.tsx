@@ -169,7 +169,7 @@ export const WebPlayback = ({ token }: { token: string }) => {
 
 	if (!player) {
 		return null
-	} else if (playbackState?.item || recentlyPlayed?.items) {
+	} else if (playbackState || recentlyPlayed) {
 		return (
 			<>
 				<section className="p-2 flex gap-2 border-b border-t">
@@ -189,7 +189,7 @@ export const WebPlayback = ({ token }: { token: string }) => {
 							<Image
 								width={50}
 								height={50}
-								src={playbackState?.item?.album?.images[2]?.url}
+								src={playbackState?.item?.album?.images[2].url}
 								className="rounded"
 								alt={`${playbackState?.item?.name} ${playbackState?.item?.type} cover`}
 							/>
@@ -197,9 +197,9 @@ export const WebPlayback = ({ token }: { token: string }) => {
 							<Image
 								width={50}
 								height={50}
-								src={recentlyPlayed?.items[0]?.track?.album?.images[2]?.url ?? ''}
+								src={recentlyPlayed?.items[0].track.album.images[2].url ?? ''}
 								className="rounded"
-								alt={`${recentlyPlayed?.items[0]?.track?.name} ${recentlyPlayed?.items[0]?.track?.type} cover`}
+								alt={`${recentlyPlayed?.items[0].track.name} ${recentlyPlayed?.items[0].track.type} cover`}
 							/>
 						) : null}
 
