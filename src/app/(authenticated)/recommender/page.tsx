@@ -46,6 +46,7 @@ export default function Recommender() {
 		'cantopop',
 		'chicago-house',
 		'children',
+		'chill',
 		'classical',
 		'club',
 		'comedy',
@@ -76,6 +77,7 @@ export default function Recommender() {
 		'groove',
 		'grunge',
 		'guitar',
+		'happy',
 		'hard-rock',
 		'hardcore',
 		'hardstyle',
@@ -111,6 +113,7 @@ export default function Recommender() {
 		'new-release',
 		'opera',
 		'pagode',
+		'party',
 		'philippines-opm',
 		'piano',
 		'pop',
@@ -122,12 +125,15 @@ export default function Recommender() {
 		'punk',
 		'punk-rock',
 		'r-n-b',
+		'rainy-day',
 		'reggae',
 		'reggaeton',
 		'road-trip',
 		'rock',
 		'rock-n-roll',
 		'rockabilly',
+		'romance',
+		'sad',
 		'salsa',
 		'samba',
 		'sertanejo',
@@ -555,7 +561,7 @@ export default function Recommender() {
 						</>
 					)}
 				</>
-			) : !data.tracks.length <= 0 ? (
+			) : data.tracks.length !== 0 ? (
 				<>
 					<GradientText headingSize="h2" className="pb-1 text-center text-2xl to-80%">
 						Here&apos;s your recommendations for
@@ -581,7 +587,7 @@ export default function Recommender() {
 										alt={`${track.name} album cover`}
 									/>
 									<h3 className="pt-2 scroll-m-20 text-xl font-semibold tracking-tight">
-										{track.name}
+										{track.name} - {track.artists[0].name}
 									</h3>
 								</div>
 							</div>
