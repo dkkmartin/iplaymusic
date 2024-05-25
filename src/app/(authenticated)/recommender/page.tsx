@@ -3,7 +3,6 @@
 import PageContent from '@/components/pages/pageContent'
 import GradientText from '@/components/text/gradientHeading'
 import { Button } from '@/components/ui/button'
-import { useAutoAnimate } from '@formkit/auto-animate/react'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import {
@@ -24,7 +23,6 @@ export default function Recommender() {
 	const [selectedTempos, setSelectedTempos] = useState<string[]>([])
 	const [showCommandList, setShowCommandList] = useState(false)
 	const [searchInput, setSearchInput] = useState('')
-	const [parent, enableAnimations] = useAutoAnimate()
 	const [data, setData] = useState<Root | null>(null)
 	const [loading, setLoading] = useState(false)
 	const { data: session, status } = useSession()
@@ -474,7 +472,7 @@ export default function Recommender() {
 	}
 
 	return (
-		<PageContent ref={parent} className="flex flex-col gap-4 items-center">
+		<PageContent className="flex flex-col gap-4 items-center">
 			<GradientText className=" to-70% pb-2">AI recommender</GradientText>
 			{!data ? (
 				<>
