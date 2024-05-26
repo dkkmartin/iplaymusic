@@ -33,7 +33,20 @@ async function refreshAccessToken(session: any) {
 }
 
 function isTokenExpired(token: any) {
-	return new Date(Number(token.expires_at) * 1000).getTime() <= Date.now()
+	// Convert Unix timestamp to a date object
+	const expirationDate = new Date(Number(token.expires_at) * 1000)
+
+	// Get the current time in milliseconds
+	const currentTime = Date.now()
+
+	// Calculate the difference in milliseconds between expiration time and current time
+	const timeDifferenceMs = expirationDate.getTime() - currentTime
+
+	// Convert milliseconds to minutes
+	const timeDifferenceMinutes = timeDifferenceMs / (1000 * 60)
+
+	// Check if there are 10 minutes or less until the expiration time
+	return timeDifferenceMinutes <= 10
 }
 
 const sessionCookie = process.env.NEXTAUTH_URL?.startsWith('https://')
