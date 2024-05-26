@@ -6,12 +6,13 @@ import { useChatStore } from '@/lib/stores'
 import { useUserContext } from '@/lib/useUserContext'
 import { useChat } from 'ai/react'
 import { useSession } from 'next-auth/react'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 
 export default function Chat() {
 	const { data: session, status } = useSession()
 	const { userContext } = useUserContext(session?.user.token ?? '')
+	const container = useRef<HTMLDivElement>(null)
 	const { messages, input, handleInputChange, handleSubmit, setMessages, isLoading, append } =
 		useChat({
 			body: { context: userContext },
@@ -19,13 +20,30 @@ export default function Chat() {
 	const chatMessagesStore = useChatStore((state) => state.chatMessages)
 	const setChatMessagesStore = useChatStore((state) => state.setChatMessages)
 
+	const Scroll = () => {
+		const { offsetHeight, scrollHeight, scrollTop } = container.current as HTMLDivElement
+		if (scrollHeight <= scrollTop + offsetHeight + 100) {
+			container.current?.scrollTo(0, scrollHeight)
+		}
+	}
+
+	useEffect(() => {
+		Scroll()
+	}, [messages])
+
 	// Load messages from store if messages are empty
 	useEffect(() => {
+		if (!userContext.tracks && !userContext.artists) return
 		if (messages.length === 0 && chatMessagesStore && chatMessagesStore.length > 0) {
 			//@ts-ignore
 			setMessages(chatMessagesStore)
+		} else if (messages.length === 0) {
+			append({
+				role: 'user',
+				content: `Hello i am ${session?.user.name}, any hot new songs you can recommend me today?`,
+			})
 		}
-	}, [setMessages, chatMessagesStore, messages.length])
+	}, [setMessages, chatMessagesStore, messages.length, append, session?.user.name, userContext])
 
 	// Persist messages to the store
 	useEffect(() => {
@@ -37,7 +55,7 @@ export default function Chat() {
 	return (
 		<PageContent className="h-[calc(100dvh-133px)] mb-0">
 			<div className="flex flex-col justify-between h-full">
-				<div className="overflow-scroll h-full pb-4">
+				<div className="overflow-scroll h-full pb-4" ref={container}>
 					{messages.map((m) => (
 						<div key={m.id} className={'chat ' + (m.role === 'user' ? ' chat-start' : 'chat-end')}>
 							<div className="chat-bubble dark:bg-[#111625] text-white bg-black">
