@@ -2,14 +2,18 @@
 import { NextMiddleware, NextRequest, NextResponse } from 'next/server'
 import { encode, getToken } from 'next-auth/jwt'
 
+export const config = {
+	matcher: ['/', '/categories', '/playlist', '/search', '/artist', '/featured-playlists'],
+}
+
 // Utility functions
-async function refreshAccessToken(token: any) {
+async function refreshAccessToken(session: any) {
 	const res = await fetch('https://accounts.spotify.com/api/token', {
 		method: 'POST',
-		headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+		headers: { 'content-Type': 'application/x-www-form-urlencoded' },
 		body: new URLSearchParams({
 			grant_type: 'refresh_token',
-			refresh_token: token.refresh_token as string,
+			refresh_token: session.refresh_token as string,
 			client_id: process.env.SPOTIFY_CLIENT_ID as string,
 			client_secret: process.env.SPOTIFY_CLIENT_SECRET as string,
 		}),
@@ -22,18 +26,27 @@ async function refreshAccessToken(token: any) {
 		return null
 	}
 
-	token.access_token = data.access_token
-	token.expires_at = data.expires_in ? Date.now() / 1000 + data.expires_in : token.expires_at
+	session.access_token = data.access_token
+	session.expires_at = data.expires_in ? Date.now() / 1000 + data.expires_in : session.expires_at
 
-	return token
+	return session
 }
 
 function isTokenExpired(token: any) {
-	return token.expires_at && Date.now() > Number(token.expires_at) * 1000 - 30 * 60 * 1000
-}
+	// Convert Unix timestamp to a date object
+	const expirationDate = new Date(Number(token.expires_at) * 1000)
 
-export const config = {
-	matcher: ['/', '/categories', '/playlist', '/search', '/artist', '/featured-playlists'],
+	// Get the current time in milliseconds
+	const currentTime = Date.now()
+
+	// Calculate the difference in milliseconds between expiration time and current time
+	const timeDifferenceMs = expirationDate.getTime() - currentTime
+
+	// Convert milliseconds to minutes
+	const timeDifferenceMinutes = timeDifferenceMs / (1000 * 60)
+
+	// Check if there are 10 minutes or less until the expiration time
+	return timeDifferenceMinutes <= 10
 }
 
 const sessionCookie = process.env.NEXTAUTH_URL?.startsWith('https://')

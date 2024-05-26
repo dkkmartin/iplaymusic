@@ -8,6 +8,7 @@ declare module 'next-auth' {
 		user: {
 			/** Oauth access token */
 			token?: string
+			refresh_token?: string
 			expires_at?: number
 		} & DefaultSession['user']
 	}
