@@ -1,8 +1,15 @@
 import { useEffect, useState } from 'react'
-import { Root as TracksRoot, Item as TrackItem } from '@/types/user/topTracks'
 import { Root as ArtistsRoot, Item as ArtistItem } from '@/types/user/topArtists'
+import { Root as TracksRoot, Item as TrackItem } from '@/types/user/topTracks'
 
 type UserContextType = {
+	artists?: {
+		followers: number
+		genres: string[]
+		name: string
+		popularity: number
+		type: string
+	}[]
 	tracks?: {
 		album: string
 		artist: string
@@ -14,24 +21,23 @@ type UserContextType = {
 		trackPopularity: number
 		trackType: string
 	}[]
-	artists?: {
-		followers: number
-		genres: string[]
-		name: string
-		popularity: number
-		type: string
-	}[]
 }
 
 export function useUserContext(token: string) {
 	const [userContext, setUserContext] = useState<UserContextType>({})
 
 	useEffect(() => {
-		if (token) {
+		console.log(userContext)
+	}, [userContext])
+
+	useEffect(() => {
+		if (token && !userContext.artists && !userContext.tracks) {
+			// Check if no data exists
 			const fetchData = async () => {
 				try {
-					await getTracks(token)
-					await getArtists(token)
+					const artists = await getArtists(token)
+					const tracks = await getTracks(token)
+					setUserContext({ artists, tracks })
 				} catch (error) {
 					console.error('Error fetching data:', error)
 				}
@@ -39,7 +45,34 @@ export function useUserContext(token: string) {
 
 			fetchData()
 		}
-	}, [token])
+	}, [token, userContext.artists, userContext.tracks])
+
+	async function getArtists(token: string) {
+		try {
+			const res = await fetch('https://api.spotify.com/v1/me/top/artists?time_range=long_term', {
+				headers: { Authorization: `Bearer ${token}` },
+			})
+
+			if (!res.ok) {
+				throw new Error('Failed to fetch top artists')
+			}
+
+			const data: ArtistsRoot = await res.json()
+
+			const filteredArtists = data.items.map((artist: ArtistItem) => ({
+				followers: artist.followers.total,
+				genres: artist.genres,
+				name: artist.name,
+				popularity: artist.popularity,
+				type: artist.type,
+			}))
+
+			return filteredArtists
+		} catch (error) {
+			console.error('Error fetching top artists:', error)
+			return []
+		}
+	}
 
 	async function getTracks(token: string) {
 		try {
@@ -65,56 +98,10 @@ export function useUserContext(token: string) {
 				trackType: track.type,
 			}))
 
-			// Fetch genres and artist popularity concurrently
-			await Promise.all(
-				filteredTracks.map(async (track) => {
-					try {
-						const artistRes = await fetch(`https://api.spotify.com/v1/artists/${track.artistId}`, {
-							headers: { Authorization: `Bearer ${token}` },
-						})
-
-						if (!artistRes.ok) {
-							throw new Error(`Failed to fetch artist data for artistId: ${track.artistId}`)
-						}
-
-						const artistData: ArtistItem = await artistRes.json()
-						track.genres = artistData.genres
-						track.artistPopularity = artistData.popularity
-					} catch (error) {
-						console.error(`Error fetching artist data for ${track.artistId}:`, error)
-					}
-				})
-			)
-
-			setUserContext((prevContext) => ({ ...prevContext, tracks: filteredTracks }))
+			return filteredTracks
 		} catch (error) {
 			console.error('Error fetching top tracks:', error)
-		}
-	}
-
-	async function getArtists(token: string) {
-		try {
-			const res = await fetch('https://api.spotify.com/v1/me/top/artists?time_range=long_term', {
-				headers: { Authorization: `Bearer ${token}` },
-			})
-
-			if (!res.ok) {
-				throw new Error('Failed to fetch top artists')
-			}
-
-			const data: ArtistsRoot = await res.json()
-
-			const filteredArtists = data.items.map((artist: ArtistItem) => ({
-				followers: artist.followers.total,
-				genres: artist.genres,
-				name: artist.name,
-				popularity: artist.popularity,
-				type: artist.type,
-			}))
-
-			setUserContext((prevContext) => ({ ...prevContext, artists: filteredArtists }))
-		} catch (error) {
-			console.error('Error fetching top artists:', error)
+			return []
 		}
 	}
 
