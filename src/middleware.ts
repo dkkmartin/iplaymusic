@@ -2,15 +2,20 @@
 import { NextMiddleware, NextRequest, NextResponse } from 'next/server'
 import { encode, getToken } from 'next-auth/jwt'
 
+export const config = {
+	matcher: ['/', '/categories', '/playlist', '/search', '/artist', '/featured-playlists'],
+}
+
 // Utility functions
 async function refreshAccessToken(session: any) {
 	const res = await fetch('https://accounts.spotify.com/api/token', {
 		method: 'POST',
-		headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+		headers: { 'content-Type': 'application/x-www-form-urlencoded' },
 		body: new URLSearchParams({
 			grant_type: 'refresh_token',
 			refresh_token: session.refresh_token as string,
 			client_id: process.env.SPOTIFY_CLIENT_ID as string,
+			client_secret: process.env.SPOTIFY_CLIENT_SECRET as string,
 		}),
 	})
 
@@ -28,11 +33,7 @@ async function refreshAccessToken(session: any) {
 }
 
 function isTokenExpired(token: any) {
-	return token.expires_at && Date.now() > Number(token.expires_at) * 1000 - 30 * 60 * 1000
-}
-
-export const config = {
-	matcher: ['/', '/categories', '/playlist', '/search', '/artist', '/featured-playlists'],
+	return new Date(Number(token.expires_at) * 1000).getTime() <= Date.now()
 }
 
 const sessionCookie = process.env.NEXTAUTH_URL?.startsWith('https://')
@@ -53,7 +54,6 @@ export const middleware: NextMiddleware = async (request: NextRequest) => {
 	console.log('Executed middleware')
 
 	const session = await getToken({ req: request })
-	console.log(session)
 
 	if (!session) return signOut(request)
 

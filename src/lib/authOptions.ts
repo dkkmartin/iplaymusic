@@ -35,6 +35,7 @@ export const authOptions: NextAuthOptions = {
 				session.user = {
 					...session.user,
 					token: token.access_token as string,
+					refresh_token: token.refresh_token as string,
 					expires_at: token.expires_at as number,
 				}
 			}
