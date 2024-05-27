@@ -1,18 +1,20 @@
 'use client'
 
+import { continueConversation, Message } from '@/app/actions'
 import PageContent from '@/components/pages/pageContent'
 import { Input } from '@/components/ui/input'
 import { useChatStore } from '@/lib/stores'
 import { useUserContext } from '@/lib/useUserContext'
 import { useChat } from 'ai/react'
 import { useSession } from 'next-auth/react'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 
 export default function Chat() {
 	const { data: session, status } = useSession()
 	const { userContext } = useUserContext(session?.user.token ?? '')
 	const container = useRef<HTMLDivElement>(null)
+	const [conversation, setConversation] = useState<Message[]>([])
 	const { messages, input, handleInputChange, handleSubmit, setMessages, isLoading, append } =
 		useChat({
 			body: { context: userContext },
@@ -40,10 +42,10 @@ export default function Chat() {
 		} else if (messages.length === 0) {
 			append({
 				role: 'user',
-				content: `Hello i am ${session?.user.name}, any hot new songs you can recommend me today?`,
+				content: 'Hi',
 			})
 		}
-	}, [setMessages, chatMessagesStore, messages.length, append, session?.user.name, userContext])
+	}, [setMessages, chatMessagesStore, messages.length, append, userContext])
 
 	// Persist messages to the store
 	useEffect(() => {
@@ -56,23 +58,37 @@ export default function Chat() {
 		<PageContent className="h-[calc(100dvh-133px)] mb-0">
 			<div className="flex flex-col justify-between h-full">
 				<div className="overflow-scroll h-full pb-4" ref={container}>
-					{messages.map((m) => (
-						<div key={m.id} className={'chat ' + (m.role === 'user' ? ' chat-start' : 'chat-end')}>
+					{conversation.map((m, index) => (
+						<div key={index} className={'chat ' + (m.role === 'user' ? ' chat-start' : 'chat-end')}>
 							<div className="chat-bubble dark:bg-[#111625] text-white bg-black">
 								<ReactMarkdown>{m.content}</ReactMarkdown>
 							</div>
 						</div>
 					))}
 				</div>
-				<form onSubmit={handleSubmit}>
+
+				<div className="flex justify-center mb-8">
 					<Input
 						disabled={isLoading}
-						className="p-2 mb-8 border dark:border-gray-300 border-black rounded shadow-xl"
+						className="p-2  border dark:border-gray-300 border-black rounded shadow-xl"
 						value={input}
 						placeholder={isLoading ? 'Loading...' : 'Say something...'}
 						onChange={handleInputChange}
 					/>
-				</form>
+					<button
+						className="border px-4 border-white rounded"
+						onClick={async () => {
+							const { messages } = await continueConversation([
+								...conversation,
+								{ role: 'user', content: input },
+							])
+
+							setConversation(messages)
+						}}
+					>
+						Send
+					</button>
+				</div>
 			</div>
 		</PageContent>
 	)
