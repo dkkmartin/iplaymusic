@@ -122,13 +122,15 @@ export default function PlayerDrawer({
 					<section className="w-full flex justify-center">
 						{playbackState && (
 							<Link href={`/artist/${playbackState?.item?.artists[0].id}`}>
-								<Image
-									src={artistImageSrc}
-									width={200}
-									height={200}
-									className="rounded-full object-cover max-h-[200px] shadow-xl"
-									alt={`${playbackState?.item?.artists[0]?.name} ${playbackState?.item?.artists[0]?.type} cover`}
-								></Image>
+								<DrawerClose>
+									<Image
+										src={artistImageSrc}
+										width={200}
+										height={200}
+										className="rounded-full object-cover max-h-[200px] shadow-xl"
+										alt={`${playbackState?.item?.artists[0]?.name} ${playbackState?.item?.artists[0]?.type} cover`}
+									></Image>
+								</DrawerClose>
 							</Link>
 						)}
 					</section>
@@ -140,9 +142,11 @@ export default function PlayerDrawer({
 							<div className="flex gap-2">
 								{playbackState?.item?.artists.map((artist, index: number) => (
 									<Link href={`/artist/${artist.id}`} key={index}>
-										<h3 className="scroll-m-20 text-xl font-light tracking-tight truncate">
-											{artist.name}
-											{index < playbackState.item.artists.length - 1 ? ',' : ''}
+										<h3 className="scroll-m-20 text-xl font-light tracking-tight truncate underline">
+											<DrawerClose>
+												{artist.name}
+												{index < playbackState.item.artists.length - 1 ? ',' : ''}
+											</DrawerClose>
 										</h3>
 									</Link>
 								))}
