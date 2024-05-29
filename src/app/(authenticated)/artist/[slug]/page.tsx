@@ -51,7 +51,7 @@ export default async function Artist({ params }: { params: { slug: string } }) {
 	])
 
 	return (
-		<div className="flex flex-col">
+		<div className="flex flex-col overflow-hidden">
 			{artistDetails?.images[0]?.url && (
 				<section
 					className="h-[400px] bg-cover bg-center bg-no-repeat flex flex-col justify-end px-6"
@@ -59,7 +59,15 @@ export default async function Artist({ params }: { params: { slug: string } }) {
 						backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.8)), url(${artistDetails?.images[0]?.url})`,
 					}}
 				>
-					<h1 className="scroll-m-20 text-5xl font-extrabold tracking-tight text-white pb-2">
+					<h1
+						className={`scroll-m-20 font-extrabold tracking-tight text-white pb-2 ${
+							artistDetails?.name.length > 16
+								? 'text-3xl'
+								: artistDetails?.name.length > 12
+								? 'text-4xl'
+								: 'text-5xl'
+						}`}
+					>
 						{artistDetails?.name}
 					</h1>
 				</section>
