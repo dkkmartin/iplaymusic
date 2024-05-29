@@ -89,17 +89,25 @@ export default function Search() {
 				type="search"
 				placeholder="Search"
 			/>
-			<div className="flex justify-center py-4">
-				<ButtonGroup
-					buttonLabels={['Artists', 'Albums', 'Playlists', 'Tracks']}
-					callback={(label) => filterData(label)}
-				></ButtonGroup>
-			</div>
+			{data && (
+				<div className="flex justify-center py-4">
+					<ButtonGroup
+						buttonLabels={['Artists', 'Albums', 'Playlists', 'Tracks']}
+						callback={(label) => filterData(label)}
+					></ButtonGroup>
+				</div>
+			)}
 			<section>
 				{data && (
 					<Link href={`/artist/${data?.artists?.items[0].id}`}>
 						<div className="shadow-2xl my-8 overflow-hidden grid grid-cols-2 items-center justify-items-center border rounded-xl dark:border-white dark:bg-[#111625]">
-							<h1 className="text-3xl font-bold text-center">{data?.artists?.items[0].name}</h1>
+							<h1
+								className={`font-bold text-center ${
+									data?.artists?.items[0]?.name.length > 12 ? 'text-xl' : 'text-3xl'
+								}`}
+							>
+								{data?.artists?.items[0].name}
+							</h1>
 							<Image
 								className="w-full"
 								src={data?.artists.items[0].images[0]?.url ?? ''}
