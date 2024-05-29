@@ -197,9 +197,9 @@ export const WebPlayback = ({ token }: { token: string }) => {
 							<Image
 								width={50}
 								height={50}
-								src={recentlyPlayed?.items[0].track.album.images[2].url ?? ''}
+								src={recentlyPlayed?.items[0]?.track?.album?.images[2]?.url ?? ''}
 								className="rounded"
-								alt={`${recentlyPlayed?.items[0].track.name} ${recentlyPlayed?.items[0].track.type} cover`}
+								alt={`${recentlyPlayed?.items[0]?.track?.name} ${recentlyPlayed?.items[0]?.track?.type} cover`}
 							/>
 						) : null}
 
