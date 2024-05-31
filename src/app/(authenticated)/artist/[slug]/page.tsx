@@ -15,34 +15,46 @@ export default async function Artist({ params }: { params: { slug: string } }) {
 	const slug = params.slug
 
 	async function getArtistDetails(): Promise<ArtistDetails | undefined> {
-		const res = await fetch(`https://api.spotify.com/v1/artists/${slug}`, {
-			headers: {
-				Authorization: `Bearer ${session?.user.token}`,
-			},
-		})
-		const data = await res.json()
-		return data
-	}
+    try {
+        const res = await fetch(`https://api.spotify.com/v1/artists/${slug}`, {
+            headers: {
+                Authorization: `Bearer ${session?.user.token}`,
+            },
+        })
+        const data = await res.json()
+        return data
+    } catch (error) {
+        console.error('Error fetching artist details:', error)
+    }
+}
 
-	async function getArtistAlbums(): Promise<ArtistRoot | undefined> {
-		const res = await fetch(`https://api.spotify.com/v1/artists/${slug}/albums`, {
-			headers: {
-				Authorization: `Bearer ${session?.user.token}`,
-			},
-		})
-		const data = await res.json()
-		return data
-	}
+async function getArtistAlbums(): Promise<ArtistRoot | undefined> {
+    try {
+        const res = await fetch(`https://api.spotify.com/v1/artists/${slug}/albums`, {
+            headers: {
+                Authorization: `Bearer ${session?.user.token}`,
+            },
+        })
+        const data = await res.json()
+        return data
+    } catch (error) {
+        console.error('Error fetching artist albums:', error)
+    }
+}
 
-	async function getArtistTracks(): Promise<ArtistTracks | undefined> {
-		const res = await fetch(`https://api.spotify.com/v1/artists/${slug}/top-tracks`, {
-			headers: {
-				Authorization: `Bearer ${session?.user.token}`,
-			},
-		})
-		const data = await res.json()
-		return data
-	}
+async function getArtistTracks(): Promise<ArtistTracks | undefined> {
+    try {
+        const res = await fetch(`https://api.spotify.com/v1/artists/${slug}/top-tracks`, {
+            headers: {
+                Authorization: `Bearer ${session?.user.token}`,
+            },
+        })
+        const data = await res.json()
+        return data
+    } catch (error) {
+        console.error('Error fetching artist tracks:', error)
+    }
+}
 
 	const [artistDetails, artistAlbums, artistTracks] = await Promise.all([
 		getArtistDetails(),
