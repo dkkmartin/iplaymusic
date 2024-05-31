@@ -10,7 +10,7 @@ export const authOptions: NextAuthOptions = {
 			authorization: {
 				params: {
 					scope:
-						'streaming user-top-read user-read-playback-state user-read-email user-modify-playback-state user-read-recently-played user-read-currently-playing',
+						'streaming user-library-read user-top-read user-read-playback-state user-read-email user-modify-playback-state user-read-recently-played user-read-currently-playing',
 				},
 			},
 		}),
