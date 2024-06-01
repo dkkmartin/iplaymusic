@@ -34,5 +34,22 @@ export default async function Profile() {
 		}
 	}
 
-	return profileData && savedTracksData && <div></div>
+	return (
+		profileData &&
+		savedTracksData && (
+			<div>
+				<h1>{profileData.display_name}</h1>
+				<p>{profileData.email}</p>
+				<p>{profileData.followers.total} followers</p>
+				<h2>Saved Tracks</h2>
+				<ul>
+					{savedTracksData.items.map((track) => (
+						<li key={track.track.id}>
+							{track.track.name} by {track.track.artists[0].name}
+						</li>
+					))}
+				</ul>
+			</div>
+		)
+	)
 }
