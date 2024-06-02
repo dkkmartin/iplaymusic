@@ -27,7 +27,7 @@ export default async function FeaturedPlaylists() {
 	return (
 		playlistData?.playlists?.items && (
 			<PageContent>
-				<GradientText headingSize="h1">Featured</GradientText>
+				<GradientText headingSize="h1">Featured Playlists</GradientText>
 				<section className="grid grid-cols-2 gap-4">
 					{playlistData?.playlists?.items.map((playlist: any, index: number) => (
 						<Link href={`/playlist/${playlist.id}`} key={index}>
