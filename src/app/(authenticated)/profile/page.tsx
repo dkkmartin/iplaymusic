@@ -125,8 +125,13 @@ export default async function Profile() {
 								token={session?.user.token ?? ''}
 								uri={track.track.uri}
 							>
-								<li className="grid grid-cols-[20px_minmax(100px,300px)_1fr] gap-4 items-center">
-									<p className="justify-self-end">{index + 1}</p>
+								<li className="grid grid-cols-[64px_minmax(100px,300px)_1fr] gap-4 items-center">
+									<Image
+										src={track.track.album.images[2].url}
+										width={64}
+										height={64}
+										alt={`${track.track.type} album cover`}
+									/>
 									<div>
 										<p className="font-semibold leading-none">{track.track.name}</p>
 										<p className="text-sm text-muted-foreground truncate">
