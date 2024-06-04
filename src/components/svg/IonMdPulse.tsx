@@ -1,41 +1,44 @@
 'use client'
+
 import { usePathname } from 'next/navigation'
 import { useTheme } from 'next-themes'
-import React, { SVGProps } from 'react'
+import { SVGProps, useEffect, useState } from 'react'
 
 export function IonMdPulse(props: SVGProps<SVGSVGElement>) {
 	const pathname = usePathname()
 	const { theme } = useTheme()
-	let fillColor
+	const [fillColor, setFillColor] = useState<string>('')
 
-	// My head hurt
-	// Check if the current theme is 'dark'
-	if (theme === 'dark') {
-		// If the theme is 'dark' and the current pathname is not '/categories'
-		if (pathname !== '/categories') {
-			// Set fillColor to 'url(#grad)'
-			// This is the color for not selected nav item
-			fillColor = 'url(#grad)'
+	useEffect(() => {
+		// My head hurt
+		// Check if the current theme is 'dark'
+		if (theme === 'dark') {
+			// If the theme is 'dark' and the current pathname is not '/categories'
+			if (pathname !== '/categories') {
+				// Set fillColor to 'url(#grad)'
+				// This is the color for not selected nav item
+				setFillColor('url(#grad)')
+			} else {
+				// If the theme is 'dark' and the current pathname is '/categories'
+				// Set fillColor to '#fff'
+				// This is the color for selected nav item
+				setFillColor('#fff')
+			}
 		} else {
-			// If the theme is 'dark' and the current pathname is '/categories'
-			// Set fillColor to '#fff'
-			// This is the color for selected nav item
-			fillColor = '#fff'
+			// If the theme is not 'dark'
+			// And the current pathname is not '/categories'
+			if (pathname !== '/categories') {
+				// Set fillColor to 'url(#grad)'
+				// This is the color for not selected nav item
+				setFillColor('url(#grad)')
+			} else {
+				// If the theme is not 'dark' and the current pathname is '/categories'
+				// Set fillColor to '#000'
+				// This is the color for selected nav item
+				setFillColor('#000')
+			}
 		}
-	} else {
-		// If the theme is not 'dark'
-		// And the current pathname is not '/categories'
-		if (pathname !== '/categories') {
-			// Set fillColor to 'url(#grad)'
-			// This is the color for not selected nav item
-			fillColor = 'url(#grad)'
-		} else {
-			// If the theme is not 'dark' and the current pathname is '/categories'
-			// Set fillColor to '#000'
-			// This is the color for selected nav item
-			fillColor = '#000'
-		}
-	}
+	}, [pathname, theme])
 
 	return (
 		<svg
