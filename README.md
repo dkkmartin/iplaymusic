@@ -9,6 +9,7 @@ iPlayMusic is a web application built using Next.js, designed to interact with t
 - Music playback
 - Authentication
 - Search
+- Recommender
 - Light/dark mode toggle
 
 ## Tech Stack
