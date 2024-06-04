@@ -205,18 +205,22 @@ export default function Recommender() {
 					<h2 className="scroll-m-20  pb-2 text-xl font-semibold tracking-tight first:mt-0">
 						Type any genres, moods or tempos!
 					</h2>
-					<Command className="max-h-[250px]">
+					<Command className="max-h-[250px] dark:bg-[#341831] border dark:border-white border-black">
 						<CommandInput
+							className="dark:bg-[#341831]"
 							value={searchInput}
 							onInput={(e: React.ChangeEvent<HTMLInputElement>) => setSearchInput(e.target.value)}
 							onClick={() => setShowCommandList(true)}
 							placeholder="Type anything..."
 						/>
-						<CommandList className={showCommandList ? '' : 'hidden'}>
-							<CommandEmpty onClick={() => toggleGenre(searchInput)}>{searchInput}</CommandEmpty>
+						<CommandList
+							className={showCommandList ? 'border-t dark:border-white border-black' : 'hidden'}
+						>
+							<CommandEmpty>No results found.</CommandEmpty>
 							<CommandGroup heading="Genres">
 								{availableGenres.map((genre) => (
 									<CommandItem
+										className="dark:aria-selected:bg-[#111625]"
 										key={genre}
 										onSelect={() => {
 											toggleGenre(genre)
