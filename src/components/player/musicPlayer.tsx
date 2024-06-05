@@ -214,14 +214,16 @@ export const WebPlayback = ({ token }: { token: string }) => {
 									<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
 								</Marquee>
 							) : (
-								<Marquee speed={30} className="shadow-inner">
-									<div className="flex gap-2">
-										<p className="font-bold">{recentlyPlayed?.items[0].track.name}</p>
-										<span>&#9679;</span>
-										<p className="font-bold">{recentlyPlayed?.items[0].track.artists[0].name}</p>
-									</div>
-									<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-								</Marquee>
+								recentlyPlayed && (
+									<Marquee speed={30} className="shadow-inner">
+										<div className="flex gap-2">
+											<p className="font-bold">{recentlyPlayed?.items[0].track.name}</p>
+											<span>&#9679;</span>
+											<p className="font-bold">{recentlyPlayed?.items[0].track.artists[0].name}</p>
+										</div>
+										<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+									</Marquee>
+								)
 							)}
 							{playbackState ? (
 								<div className="flex gap-1 items-center">
