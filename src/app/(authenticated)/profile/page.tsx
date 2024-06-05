@@ -1,6 +1,6 @@
 import { authOptions } from '@/lib/authOptions'
 import { Root as userRoot } from '@/types/user/user'
-import { Root as savedTracksRoot, Item } from '@/types/user/savedTracks'
+import { Root as savedTracksRoot } from '@/types/user/savedTracks'
 import { Root as userPlaylistsRoot } from '@/types/user/userPlaylists'
 import { getServerSession } from 'next-auth'
 import Image from 'next/image'
@@ -8,8 +8,7 @@ import PageContent from '@/components/pages/pageContent'
 import { Badge } from '@/components/ui/badge'
 import GradientText from '@/components/text/gradientHeading'
 import Link from 'next/link'
-import NewPlaybackContainer from '@/components/player/newPlaybackContainer'
-import { msToTime } from '@/lib/utils'
+import SavedSongs from '@/components/profile/savedSongs'
 
 export default async function Profile() {
 	const session = await getServerSession(authOptions)
@@ -60,10 +59,11 @@ export default async function Profile() {
 	}
 
 	return (
+		session?.user &&
 		profileData &&
 		savedTracksData &&
 		userPlaylists && (
-			<PageContent className="flex flex-col items-center pt-16 profile-bg-gradient">
+			<PageContent className="flex flex-col items-center pt-16 ">
 				<section className="flex flex-col gap-2 pb-8">
 					<Image
 						className="rounded-full shadow-md border"
@@ -88,7 +88,6 @@ export default async function Profile() {
 						)}
 					</div>
 				</section>
-
 				<section className="w-full pb-4">
 					<GradientText headingSize="h2" className="text-2xl pb-2">
 						Playlists
@@ -113,39 +112,7 @@ export default async function Profile() {
 						))}
 					</ul>
 				</section>
-
-				<section className="w-full">
-					<GradientText headingSize="h2" className="text-2xl pb-2">
-						Saved songs
-					</GradientText>
-					<ol className="flex flex-col gap-4">
-						{savedTracksData.items.map((track: Item, index) => (
-							<NewPlaybackContainer
-								key={index}
-								token={session?.user.token ?? ''}
-								uri={track.track.uri}
-							>
-								<li className="grid grid-cols-[64px_minmax(100px,300px)_1fr] gap-4 items-center">
-									<Image
-										src={track.track.album.images[2].url}
-										width={64}
-										height={64}
-										alt={`${track.track.type} album cover`}
-									/>
-									<div>
-										<p className="font-semibold leading-none">{track.track.name}</p>
-										<p className="text-sm text-muted-foreground truncate">
-											{track.track.artists.map((artist) => artist.name).join(', ')}
-										</p>
-									</div>
-									<p className="text-sm text-muted-foreground justify-self-end">
-										{msToTime(track.track.duration_ms)}
-									</p>
-								</li>
-							</NewPlaybackContainer>
-						))}
-					</ol>
-				</section>
+				<SavedSongs tracksData={savedTracksData} token={session?.user.token!}></SavedSongs>
 			</PageContent>
 		)
 	)
