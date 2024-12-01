@@ -78,7 +78,7 @@ export const WebPlayback = ({ token }: { token: string }) => {
 
 	// useEffect for handling polling time
 	// If response is 204 the polling will switch to a polling time of 4000ms
-	// If response is 200 the polling will switch to a polling time of 2000ms
+	// If response is 200 the polling will switch to a polling time of 1000ms
 	// If response is 429 the polling will stop as it has exceeded its rate limits
 	// This is to decrease the number of requests to the server if there is not playback
 	useEffect(() => {
