@@ -21,4 +21,4 @@ iPlayMusic is a web application built using Next.js, designed to interact with t
 - Next-Auth
 - TailwindCSS
 - Zustand
-- Shadnc
+- Shadcn
