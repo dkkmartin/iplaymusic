@@ -2,6 +2,9 @@
 
 # iPlayMusic
 
+## Video Demo
+https://github.com/user-attachments/assets/f4c02082-cd85-4c19-862d-52fd9770fa29
+
 iPlayMusic is a web application built using Next.js, designed to interact with the Spotify API to fetch, display and play music.
 
 ## Features
